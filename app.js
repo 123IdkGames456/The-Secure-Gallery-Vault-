@@ -50,20 +50,72 @@ async function refreshGallery(){
     message("galleryStatus","");
   }catch(err){message("galleryStatus",err.message,"error");}
 }
+function readImageAsBase64(file) {
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result).split(",")[1]);
+    reader.onerror=()=>reject(new Error("Could not read "+file.name+"."));
+    reader.readAsDataURL(file);
+  });
+}
+async function uploadOne(file) {
+  const base64=await readImageAsBase64(file);
+  await api("uploadImage",{name:file.name,mimeType:file.type,base64});
+}
 $("fileInput").addEventListener("change",async e=>{
-  const files=Array.from(e.target.files||[]);e.target.value="";
-  for(const file of files){
-    if(!file.type.startsWith("image/"))continue;
-    if(file.size>8*1024*1024){message("galleryStatus",file.name+" is over the 8 MB upload limit.","error");continue;}
-    message("galleryStatus","Uploading "+file.name+"…");
-    try{
-      const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error("Could not read image."));reader.readAsDataURL(file);});
-      const base64=String(dataUrl).split(",")[1];
-      await api("uploadImage",{name:file.name,mimeType:file.type,base64});
-      message("galleryStatus",file.name+" uploaded.","good");
-    }catch(err){message("galleryStatus",err.message,"error");}
+  const selected=Array.from(e.target.files||[]);
+  e.target.value="";
+  if(!selected.length)return;
+
+  const valid=[];
+  const errors=[];
+  for(const file of selected){
+    if(!file.type.startsWith("image/"))errors.push(file.name+": not an image");
+    else if(file.size>8*1024*1024)errors.push(file.name+": larger than the 8 MB limit");
+    else valid.push(file);
   }
+  if(!valid.length){
+    message("galleryStatus",errors.length?errors.join(" · "):"No images selected.","error");
+    return;
+  }
+
+  const uploadButton=document.querySelector('label[for="fileInput"]');
+  uploadButton.style.pointerEvents="none";
+  uploadButton.style.opacity=".55";
+  const input=$("fileInput");
+  input.disabled=true;
+  let completed=0;
+  let nextIndex=0;
+  let saved=0;
+
+  message("galleryStatus","Saving 0 of "+valid.length+" images…");
+  async function worker(){
+    while(true){
+      const index=nextIndex++;
+      if(index>=valid.length)return;
+      const file=valid[index];
+      try{
+        await uploadOne(file);
+        saved++;
+      }catch(err){
+        errors.push(file.name+": "+err.message);
+      }
+      completed++;
+      message("galleryStatus","Saving "+completed+" of "+valid.length+" images… ("+saved+" saved)");
+    }
+  }
+
+  try{
+    await Promise.all(Array.from({length:Math.min(2,valid.length)},()=>worker()));
+  }finally{
+    input.disabled=false;
+    uploadButton.style.pointerEvents="";
+    uploadButton.style.opacity="";
+  }
+
   await refreshGallery();
+  const summary=saved+" of "+valid.length+" images saved.";
+  message("galleryStatus",errors.length?summary+" Problems: "+errors.join(" · "):summary,saved===valid.length?"good":"error");
 });
 $("backBtn").addEventListener("click",()=>{roomCode="";$("roomCode").value="";show("roomScreen");});
 $("logoutBtn").addEventListener("click",()=>{masterPassword="";roomCode="";images=[];$("masterPassword").value="";$("roomCode").value="";show("masterScreen");});
