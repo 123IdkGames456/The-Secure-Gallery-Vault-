@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101114">
+<title>The Secure Gallery Vault</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#191b20;--line:#30333b;--muted:#a1a5b0;--text:#f4f5f7;--accent:#b6a0ff;--danger:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#29243c 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+main{width:min(100% - 32px,1100px);margin:0 auto;padding:48px 0}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:42px}
+.brand{font-weight:750;letter-spacing:.02em}.brand span{color:var(--accent)}
+.panel{width:min(100%,440px);margin:10vh auto 0;padding:28px;background:#191b20ed;border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 80px #0006}
+h1{font-size:clamp(25px,5vw,36px);line-height:1.15;margin:0 0 10px}p{color:var(--muted);margin:0 0 22px}
+label{display:block;font-size:14px;color:#d7d8df;margin:16px 0 7px}input,button{font:inherit}input{width:100%;padding:14px 15px;background:#101216;border:1px solid #41444e;border-radius:11px;color:white;outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #b6a0ff22}
+button,.file-button{border:0;border-radius:11px;padding:12px 17px;background:var(--accent);color:#171321;font-weight:750;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.secondary{background:#292c34;color:var(--text);border:1px solid #41444e}.danger{color:var(--danger)}
+.full{width:100%;margin-top:18px}.hidden{display:none!important}.status{min-height:24px;margin-top:14px;color:var(--muted);font-size:14px}.status.error{color:var(--danger)}.status.good{color:#a8e6bd}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.toolbar .spacer{flex:1}.room-title{margin:0;font-size:30px}.sub{color:var(--muted);margin:5px 0 0}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:26px}
+.tile{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:14px}.tile img{display:block;width:100%;height:210px;object-fit:cover;background:#0b0c0f}.tile .meta{padding:10px 12px;display:flex;align-items:center;gap:8px}.tile .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:13px;color:#d6d7de}
+.empty{padding:48px 20px;text-align:center;border:1px dashed #41444e;border-radius:16px;color:var(--muted);margin-top:26px}
+#fileInput{display:none}.note{font-size:12px;color:#888d99;margin-top:18px}
+@media(max-width:560px){main{padding:25px 0}.panel{margin-top:8vh;padding:22px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile img{height:155px}.room-title{font-size:24px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand">◈ <span>THE</span> SECURE GALLERY VAULT</div><button id="logoutBtn" class="secondary hidden">Lock vault</button></header>
+<section id="masterScreen" class="panel">
+<h1>Private access</h1><p>Enter the master password to continue.</p>
+<form id="masterForm"><label for="masterPassword">Master password</label><input id="masterPassword" type="password" autocomplete="current-password" required autofocus><button class="full" type="submit">Continue</button></form><div id="masterStatus" class="status" role="status"></div>
+</section>
+<section id="roomScreen" class="panel hidden">
+<h1>Enter a room</h1><p>Each room has its own private image collection.</p>
+<form id="roomForm"><label for="roomCode">Room access code</label><input id="roomCode" type="password" autocomplete="off" required><button class="full" type="submit">Unlock room</button></form><div id="roomStatus" class="status" role="status"></div>
+</section>
+<section id="galleryScreen" class="hidden">
+<div class="toolbar"><div><h1 id="roomTitle" class="room-title">Gallery</h1><div class="sub" id="imageCount">Loading images…</div></div><div class="spacer"></div><label class="file-button" for="fileInput">＋ Upload image</label><input id="fileInput" type="file" accept="image/*" multiple><button id="backBtn" class="secondary">Change room</button></div>
+<div id="gallery" class="gallery"></div><div id="galleryEmpty" class="empty hidden">This room is empty.<br>Upload an image to add it here.</div><div id="galleryStatus" class="status"></div>
+</section>
+<div class="note">Connect the Google Apps Script endpoint in app.js before using the vault.</div>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
