@@ -8,7 +8,8 @@ A room-based image gallery hosted on GitHub Pages, using Google Sheets and Googl
 - Google Apps Script source: `Code.gs`
 - Images are converted to Base64 in the browser and saved in 40,000-character chunks in the `VaultImages` sheet.
 - Room codes and creation dates are stored in `VaultRooms`.
-- Each image is limited to 4 MB after browser resizing/compression.
+- Each image is automatically resized/compressed to fit a maximum of 25 upload parts (40,000 Base64 characters per part), roughly 750 KB of image data.
+- Large still images are reduced in dimensions and quality until they fit. Animated GIFs above the limit are rejected because the browser does not recompress their animation.
 - Original selected files over 20 MB are rejected.
 
 ## Setup
