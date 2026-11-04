@@ -218,7 +218,7 @@ async function uploadOne(file, onProgress) {
   const auth = await getUploadAuth();
   const uploaded = await uploadToImageKit(file, auth, onProgress);
   const imageId = makeId();
-  const thumbnailUrl = uploaded.thumbnailUrl || uploaded.url;
+  const thumbnailUrl = uploaded.thumbnailUrl || (uploaded.url + (uploaded.url.includes("?") ? "&" : "?") + "tr=w-480,h-320,c-maintain_ratio");
 
   await jsonp("registerImage", {
     roomCode,
