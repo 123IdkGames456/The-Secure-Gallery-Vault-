@@ -111,7 +111,6 @@ $("createRoomBtn").addEventListener("click", async () => {
 
 function thumbnailFor(item) {
   if (item.thumbnailUrl) return item.thumbnailUrl;
-  if (item.thumbnailBase64) return "data:image/jpeg;base64," + item.thumbnailBase64;
   if (item.url) return item.url + (item.url.includes("?") ? "&" : "?") + "tr=w-480,h-320,c-maintain_ratio";
   return "";
 }
