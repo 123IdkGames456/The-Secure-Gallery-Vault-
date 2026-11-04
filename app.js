@@ -200,7 +200,7 @@ function uploadToImageKit(file, auth, onProgress) {
       try { data = JSON.parse(xhr.responseText || "{}"); }
       catch (error) { reject(new Error("ImageKit returned an unreadable response.")); return; }
       if (xhr.status < 200 || xhr.status >= 300 || !data.fileId || !data.url) {
-        reject(new Error(data.message || data help || "ImageKit upload failed."));
+        reject(new Error(data.message || "ImageKit upload failed."));
         return;
       }
       resolve(data);
