@@ -22,30 +22,21 @@ async function picrdRequest(url, options={}) {
   let response;
   try {
     response = await fetch(url,options);
-  } catch {
-    throw new Error("Could not connect to Picrd. Check your internet connection or whether Picrd is available.");
+  } catch (err) {
+    throw new Error("The browser could not reach Picrd. This may be a Picrd connection or CORS restriction. Try again later. (" + (err.message || "network error") + ")");
   }
-  let data = {};
   const body = await response.text();
+  let data = {};
   try { data = body ? JSON.parse(body) : {}; }
   catch { throw new Error("Picrd returned an unreadable response (HTTP " + response.status + ")."); }
   if (!response.ok) throw new Error(data.error || data.message || "Picrd request failed (HTTP " + response.status + ").");
   return data;
 }
 
-async function picrdRequestWithFallback(primaryUrl, fallbackUrl, options={}) {
-  try {
-    return await picrdRequest(primaryUrl,options);
-  } catch(err) {
-    if (!/HTTP (404|405)/.test(err.message)) throw err;
-    return await picrdRequest(fallbackUrl,options);
-  }
-}
-
 async function loadRoom(albumId) {
   if (!/^[A-Za-z0-9_-]{5,80}$/.test(albumId)) throw new Error("Use 5–80 letters, numbers, _ or - for a room code.");
   const encodedId = encodeURIComponent(albumId);
-  const data = await picrdRequestWithFallback(PICRD_API + "/album/" + encodedId,PICRD_API + "/albums/" + encodedId);
+  const data = await picrdRequestWithFallback(PICRD_API + "/albums/" + encodedId,PICRD_API + "/albums/" + encodedId);
   if (!Array.isArray(data.images)) throw new Error("Picrd did not return an album image list. Check that the room code is correct.");
   roomCode = albumId;
   currentImages = data.images;
@@ -76,7 +67,7 @@ $("createRoomBtn").addEventListener("click",async()=>{
   button.disabled = true;
   message("roomStatus","Creating a Picrd album…");
   try {
-    const data = await picrdRequestWithFallback(PICRD_API + "/album",PICRD_API + "/albums",{method:"POST"});
+    const data = await picrdRequestWithFallback(PICRD_API + "/albums",PICRD_API + "/albums",{method:"POST"});
     const createdAlbumId = data.album_id || data.albumId || data.data?.album_id || data.data?.albumId;
     if (!createdAlbumId) throw new Error("Picrd created no room code. Its response was: " + JSON.stringify(data).slice(0,180));
 
