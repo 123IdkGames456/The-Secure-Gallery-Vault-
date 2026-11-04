@@ -1,6 +1,6 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEIHJmQvJ8ScGxxhagYeiNFwjg7DevrXDlRW8cW1QvQChe_U_5sOly9LtqubC7Ojtt/exec";
 const CHUNK_SIZE = 40000;
-const MAX_CHUNKS = 25;
+const MAX_CHUNKS = 75;
 const MAX_BASE64_LENGTH = CHUNK_SIZE * MAX_CHUNKS;
 const MAX_IMAGE_BYTES = Math.floor(MAX_BASE64_LENGTH * 3 / 4);
 const ALLOWED_IMAGE_TYPES = ["image/png","image/jpeg","image/webp","image/gif"];
