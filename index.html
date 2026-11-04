@@ -26,12 +26,8 @@ button,.file-button{border:0;border-radius:11px;padding:12px 17px;background:var
 </head>
 <body>
 <main>
-<header><div class="brand">◈ <span>THE</span> SECURE GALLERY VAULT</div><button id="logoutBtn" class="secondary hidden">Lock vault</button></header>
-<section id="masterScreen" class="panel">
-<h1>Private access</h1><p>Enter the master password to continue.</p>
-<form id="masterForm"><label for="masterPassword">Master password</label><input id="masterPassword" type="password" autocomplete="current-password" required autofocus><button class="full" type="submit">Continue</button></form><div id="masterStatus" class="status" role="status"></div>
-</section>
-<section id="roomScreen" class="panel hidden">
+<header><div class="brand">◈ <span>THE</span> SECURE GALLERY VAULT</div></header>
+<section id="roomScreen" class="panel">
 <h1>Enter a room</h1><p>Each room has its own private image collection.</p>
 <form id="roomForm"><label for="roomCode">Room access code</label><input id="roomCode" type="text" autocomplete="off" required><button class="full" type="submit">Open room</button></form><button id="createRoomBtn" class="secondary full" type="button">＋ Create a new room</button><div id="roomStatus" class="status" role="status"></div>
 </section>
