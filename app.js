@@ -77,7 +77,7 @@ $("createRoomBtn").addEventListener("click",async()=>{
   message("roomStatus","Creating a Picrd album…");
   try {
     const data = await picrdRequestWithFallback(PICRD_API + "/album",PICRD_API + "/albums",{method:"POST"});
-    const createdAlbumId = createdAlbumId || data.albumId || data.data?.album_id || data.data?.albumId;
+    const createdAlbumId = data.album_id || data.albumId || data.data?.album_id || data.data?.albumId;
     if (!createdAlbumId) throw new Error("Picrd created no room code. Its response was: " + JSON.stringify(data).slice(0,180));
 
     $("roomCode").value = createdAlbumId;
