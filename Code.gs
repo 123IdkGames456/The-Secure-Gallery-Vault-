@@ -94,7 +94,7 @@ function listImages_(roomCode) {
 function uploadImage_(request) {
   const room = validRoom_(request.roomCode);
   const imageId = String(request.imageId || "");
-  const fileName = String(request.fileName || "image").replace(/[\\\\/:*?"<>|]/g, "_").substring(0, 180);
+  const fileName = String(request.fileName || "image").replace(/[\\\\\/:*?"<>|]/g, "_").substring(0, 180);
   const mimeType = String(request.mimeType || "application/octet-stream");
   const base64 = String(request.base64 || "");
   const thumbnailBase64 = String(request.thumbnailBase64 || "");
