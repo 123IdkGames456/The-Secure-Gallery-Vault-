@@ -1,5 +1,3 @@
-// This password is visible to anyone who can inspect the public site code.
-const MASTER_PASSWORD = "vault123";
 const PICRD_API = "https://picrd.com/api";
 const MAX_UPLOAD_SIZE = 9.5 * 1024 * 1024;
 const MAX_SOURCE_SIZE = 50 * 1024 * 1024;
@@ -10,8 +8,7 @@ let roomCode = "";
 let currentImages = [];
 
 function show(screen) {
-  ["masterScreen","roomScreen","galleryScreen"].forEach(id => $(id).classList.toggle("hidden", id !== screen));
-  $("logoutBtn").classList.toggle("hidden", screen === "masterScreen");
+  ["roomScreen","galleryScreen"].forEach(id => $(id).classList.toggle("hidden", id !== screen));
 }
 function message(id, text, type="") {
   const el = $(id);
@@ -29,20 +26,6 @@ async function picrdRequest(url, options={}) {
   if (!response.ok) throw new Error(data.error || "Picrd request failed (HTTP " + response.status + ").");
   return data;
 }
-
-$("masterForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  const entered = $("masterPassword").value;
-  if (entered !== MASTER_PASSWORD) {
-    $("masterPassword").value = "";
-    message("masterStatus","Incorrect master password.","error");
-    return;
-  }
-  $("masterPassword").value = "";
-  message("masterStatus","");
-  show("roomScreen");
-  $("roomCode").focus();
-});
 
 async function loadRoom(albumId) {
   if (!/^[A-Za-z0-9_-]{5,80}$/.test(albumId)) throw new Error("That room code does not look valid.");
@@ -199,11 +182,4 @@ $("backBtn").addEventListener("click",()=>{
   roomCode="";
   $("roomCode").value="";
   show("roomScreen");
-});
-$("logoutBtn").addEventListener("click",()=>{
-  roomCode="";
-  currentImages=[];
-  $("masterPassword").value="";
-  $("roomCode").value="";
-  show("masterScreen");
 });
