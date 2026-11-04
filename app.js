@@ -38,8 +38,7 @@ async function loadRoom(albumId) {
   show("galleryScreen");
 }
 
-$("roomForm").addEventListener("submit",async e=>{
-  e.preventDefault();
+async function openEnteredRoom() {
   const albumId = $("roomCode").value.trim();
   message("roomStatus","Opening room…");
   try {
@@ -48,6 +47,12 @@ $("roomForm").addEventListener("submit",async e=>{
   } catch(err) {
     message("roomStatus",err.message,"error");
   }
+}
+
+$("openRoomBtn").addEventListener("click",openEnteredRoom);
+$("roomForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  openEnteredRoom();
 });
 
 $("createRoomBtn").addEventListener("click",async()=>{
