@@ -1,5 +1,5 @@
 // Paste the deployed Google Apps Script Web App URL here.
-const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const API_URL = "https://script.google.com/macros/s/AKfycbxL8enxViK6dad3UCrFvzRVoHFd-5sBFuQ19SdIgFUvXs9iyvPekQqkfHEPPSZYNUcawA/exec";
 const $ = id => document.getElementById(id);
 let masterPassword = "";
 let roomCode = "";
