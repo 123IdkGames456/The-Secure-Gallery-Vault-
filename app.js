@@ -36,7 +36,7 @@ async function picrdRequest(url, options={}) {
 async function loadRoom(albumId) {
   if (!/^[A-Za-z0-9_-]{5,80}$/.test(albumId)) throw new Error("Use 5–80 letters, numbers, _ or - for a room code.");
   const encodedId = encodeURIComponent(albumId);
-  const data = await picrdRequest(PICRD_API + "/albums/" + encodedId);
+  const data = await picrdRequest(PICRD_API + "/album/" + encodedId);
   if (!Array.isArray(data.images)) throw new Error("Picrd did not return an album image list. Check that the room code is correct.");
   roomCode = albumId;
   currentImages = data.images;
@@ -67,7 +67,7 @@ $("createRoomBtn").addEventListener("click",async()=>{
   button.disabled = true;
   message("roomStatus","Creating a Picrd album…");
   try {
-    const data = await picrdRequest(PICRD_API + "/albums",{method:"POST"});
+    const data = await picrdRequest(PICRD_API + "/album",{method:"POST"});
     const createdAlbumId = data.album_id || data.albumId || data.data?.album_id || data.data?.albumId;
     if (!createdAlbumId) throw new Error("Picrd created no room code. Its response was: " + JSON.stringify(data).slice(0,180));
 
