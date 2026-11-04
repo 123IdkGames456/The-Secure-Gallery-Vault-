@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEIHJmQvJ8ScGxxhagYeiNFwjg7DevrXDlRW8cW1QvQChe_U_5sOly9LtqubC7Ojtt/exec";
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const CHUNK_SIZE = 40000;
 const ALLOWED_IMAGE_TYPES = ["image/png","image/jpeg","image/webp","image/gif"];
