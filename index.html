@@ -35,8 +35,8 @@ button,.file-button{border:0;border-radius:11px;padding:12px 17px;background:var
 <div class="toolbar"><div><h1 id="roomTitle" class="room-title">Gallery</h1><div class="sub" id="imageCount">Loading images…</div></div><div class="spacer"></div><label class="file-button" for="fileInput">＋ Upload images</label><input id="fileInput" type="file" accept="image/*" multiple><button id="backBtn" class="secondary">Change room</button></div>
 <div id="gallery" class="gallery"></div><div id="galleryEmpty" class="empty hidden">This room is empty.<br>Upload an image to add it here.</div><div id="galleryStatus" class="status"></div>
 </section>
-<div class="note">Images are hosted by Picrd. Anyone with an image or album link may be able to view it.</div>
+<div class="note">Images are stored in the connected Google Sheet as Base64 chunks.</div>
 </main>
-<script src="app.js?v=picrd-singular-album-api"></script>
+<script src="app.js?v=google-sheets-base64"></script>
 </body>
 </html>
