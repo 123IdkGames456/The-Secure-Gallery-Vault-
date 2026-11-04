@@ -1,6 +1,8 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEIHJmQvJ8ScGxxhagYeiNFwjg7DevrXDlRW8cW1QvQChe_U_5sOly9LtqubC7Ojtt/exec";
-const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const CHUNK_SIZE = 40000;
+const MAX_CHUNKS = 25;
+const MAX_BASE64_LENGTH = CHUNK_SIZE * MAX_CHUNKS;
+const MAX_IMAGE_BYTES = Math.floor(MAX_BASE64_LENGTH * 3 / 4);
 const ALLOWED_IMAGE_TYPES = ["image/png","image/jpeg","image/webp","image/gif"];
 
 const $ = id => document.getElementById(id);
@@ -112,7 +114,7 @@ async function refreshGallery() {
 }
 async function prepareImage(file) {
   if(file.size<=MAX_IMAGE_BYTES)return file;
-  if(file.type==="image/gif")throw new Error("GIF is larger than 4 MB. Animated GIF compression is not supported.");
+  if(file.type==="image/gif")throw new Error("This GIF is too large for the 25-part upload limit. Choose a smaller GIF or a smaller still image.");
   if(!("createImageBitmap" in window))throw new Error("This browser cannot resize images.");
   const bitmap=await createImageBitmap(file);
   try {
@@ -144,6 +146,7 @@ async function uploadOne(originalFile) {
   const file=await prepareImage(originalFile);
   const base64=await fileToBase64(file);
   const totalChunks=Math.ceil(base64.length/CHUNK_SIZE);
+  if(totalChunks>MAX_CHUNKS)throw new Error("Image is still too large after resizing. Choose a smaller image.");
   const imageId=makeId();
   for(let chunkIndex=0;chunkIndex<totalChunks;chunkIndex++){
     const data=base64.slice(chunkIndex*CHUNK_SIZE,(chunkIndex+1)*CHUNK_SIZE);
