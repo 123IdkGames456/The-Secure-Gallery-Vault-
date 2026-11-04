@@ -76,7 +76,7 @@ The ImageKit Public Key and URL endpoint are already configured for the ImageKit
 - The ImageKit upload signature is short-lived. Apps Script only signs requests for valid room codes.
 - A room code is a shared access code, not strong authentication. Anyone who knows a room code can view and upload to that room. Do not use this for highly sensitive images.
 - Apps Script, Google Sheets, and ImageKit have usage quotas and service limits. This setup does not promise unlimited storage or traffic.
-- Existing legacy Google Drive images may show their stored thumbnail if one exists. New uploads use ImageKit.
+- Images uploaded by the old Google Drive/Base64 version are not automatically migrated into ImageKit. They remain in the old Drive folder; upload them again through the new gallery to add them to ImageKit.
 
 ## ImageKit account values
 
