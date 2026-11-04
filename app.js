@@ -1,9 +1,6 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEIHJmQvJ8ScGxxhagYeiNFwjg7DevrXDlRW8cW1QvQChe_U_5sOly9LtqubC7Ojtt/exec";
-const CHUNK_SIZE = 40000;
-const MAX_CHUNKS = 75;
-const MAX_BASE64_LENGTH = CHUNK_SIZE * MAX_CHUNKS;
-const MAX_IMAGE_BYTES = Math.floor(MAX_BASE64_LENGTH * 3 / 4);
+const WORKER_URL = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
 const ALLOWED_IMAGE_TYPES = ["image/png","image/jpeg","image/webp","image/gif"];
+const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 const $ = id => document.getElementById(id);
 let roomCode = "";
@@ -18,27 +15,26 @@ function message(id, text, type="") {
   el.className = "status" + (type ? " " + type : "");
 }
 function apiReady() {
-  if (!GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/") || !GOOGLE_SCRIPT_URL.endsWith("/exec")) {
-    throw new Error("Google Apps Script is not connected yet. Add your deployed /exec URL to app.js.");
+  if (!WORKER_URL.startsWith("https://") || WORKER_URL.includes("PASTE_YOUR_")) {
+    throw new Error("Cloudflare Worker is not connected yet. Add your Worker URL to app.js.");
   }
 }
-async function api(action, payload={}) {
+async function api(path, options={}) {
   apiReady();
   let response;
   try {
-    response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      redirect: "follow",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action, ...payload })
-    });
+    response = await fetch(WORKER_URL.replace(/\/$/, "") + path, options);
   } catch (err) {
-    throw new Error("Could not reach Google Apps Script. Check its deployment access and web app URL. (" + (err.message || "network error") + ")");
+    throw new Error("Could not reach the image server. Check the Worker URL and CORS settings. (" + (err.message || "network error") + ")");
   }
   let data;
-  try { data = await response.json(); }
-  catch { throw new Error("Google Apps Script returned an unreadable response. Check that the /exec deployment is active."); }
-  if (!data.ok) throw new Error(data.error || "Google Apps Script request failed.");
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    data = await response.json();
+  } else {
+    throw new Error("The image server returned an unexpected response.");
+  }
+  if (!response.ok || !data.ok) throw new Error(data.error || "Image server request failed.");
   return data;
 }
 function makeId() {
@@ -47,12 +43,12 @@ function makeId() {
 async function loadRoom(code) {
   const normalized = String(code || "").trim().toUpperCase();
   if (!/^[A-Z0-9_-]{5,32}$/.test(normalized)) throw new Error("Enter a room code with 5–32 letters, numbers, _ or -.");
-  const data = await api("listImages", { roomCode: normalized });
+  const data = await api("/api/rooms/" + encodeURIComponent(normalized) + "/images");
   roomCode = normalized;
   currentImages = data.images || [];
   $("roomTitle").textContent = "Room · " + normalized;
   show("galleryScreen");
-  await renderGallery();
+  renderGallery();
 }
 async function openEnteredRoom() {
   message("roomStatus","Opening room…");
@@ -71,14 +67,14 @@ $("createRoomBtn").addEventListener("click",async()=>{
   button.disabled=true;
   message("roomStatus","Creating room…");
   try {
-    const data=await api("createRoom");
+    const data=await api("/api/rooms",{method:"POST"});
     $("roomCode").value=data.roomCode;
     await loadRoom(data.roomCode);
     message("galleryStatus","New room created. Save this room code: "+data.roomCode,"good");
   } catch(err) { message("roomStatus",err.message,"error"); }
   finally { button.disabled=false; }
 });
-async function renderGallery() {
+function renderGallery() {
   $("imageCount").textContent=currentImages.length+" image"+(currentImages.length===1?"":"s");
   $("gallery").replaceChildren();
   $("galleryEmpty").classList.toggle("hidden",currentImages.length!==0);
@@ -88,75 +84,67 @@ async function renderGallery() {
     const img=document.createElement("img");
     img.alt=item.fileName||"Uploaded image";
     img.loading="lazy";
-    img.src="";
+    img.src=WORKER_URL.replace(/\/$/,"") + "/api/rooms/" + encodeURIComponent(roomCode) + "/images/" + encodeURIComponent(item.imageId) + "?variant=thumb";
     const meta=document.createElement("div");
     meta.className="meta";
     const name=document.createElement("span");
     name.className="name";
     name.textContent=item.fileName||"Image";
-    meta.append(name);
+    const open=document.createElement("a");
+    open.href=WORKER_URL.replace(/\/$/,"") + "/api/rooms/" + encodeURIComponent(roomCode) + "/images/" + encodeURIComponent(item.imageId);
+    open.target="_blank";
+    open.rel="noopener";
+    open.textContent="Open";
+    open.style.color="var(--accent)";
+    open.style.fontSize="13px";
+    meta.append(name,open);
     tile.append(img,meta);
     $("gallery").append(tile);
-    try {
-      const data=await api("getImage",{roomCode,imageId:item.imageId});
-      img.src="data:"+data.mimeType+";base64,"+data.base64;
-    } catch(err) { img.alt="Could not load image: "+err.message; }
+    img.addEventListener("error",()=>{img.alt="Could not load image";});
   }
 }
 async function refreshGallery() {
   message("galleryStatus","Refreshing room…");
   try {
-    const data=await api("listImages",{roomCode});
+    const data=await api("/api/rooms/" + encodeURIComponent(roomCode) + "/images");
     currentImages=data.images||[];
-    await renderGallery();
+    renderGallery();
     message("galleryStatus","");
   } catch(err) { message("galleryStatus",err.message,"error"); }
 }
-async function prepareImage(file) {
-  if(file.size<=MAX_IMAGE_BYTES)return file;
-  if(file.type==="image/gif")throw new Error("This GIF is too large for the 25-part upload limit. Choose a smaller GIF or a smaller still image.");
-  if(!("createImageBitmap" in window))throw new Error("This browser cannot resize images.");
-  const bitmap=await createImageBitmap(file);
+async function makeThumbnail(file) {
+  if(!("createImageBitmap" in window)) return null;
+  let bitmap;
   try {
-    let width=bitmap.width,height=bitmap.height,quality=.82;
-    for(let attempt=0;attempt<18;attempt++){
-      const canvas=document.createElement("canvas");
-      canvas.width=Math.max(1,Math.round(width));canvas.height=Math.max(1,Math.round(height));
-      const context=canvas.getContext("2d");
-      if(!context)throw new Error("Could not create image resize canvas.");
-      context.drawImage(bitmap,0,0,canvas.width,canvas.height);
-      const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",quality));
-      canvas.width=1;canvas.height=1;
-      if(!blob)throw new Error("Could not compress image.");
-      if(blob.size<=MAX_IMAGE_BYTES)return new File([blob],file.name.replace(/\.[^.]+$/,"")+".webp",{type:"image/webp",lastModified:Date.now()});
-      width*=.82;height*=.82;quality=Math.max(.45,quality-.04);
-    }
-    throw new Error("Could not reduce image below 4 MB.");
-  } finally { bitmap.close(); }
-}
-function fileToBase64(file) {
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(String(reader.result).split(",")[1]||"");
-    reader.onerror=()=>reject(new Error("Could not read selected image."));
-    reader.readAsDataURL(file);
-  });
-}
-async function uploadOne(originalFile) {
-  const file=await prepareImage(originalFile);
-  const base64=await fileToBase64(file);
-  const totalChunks=Math.ceil(base64.length/CHUNK_SIZE);
-  if(totalChunks>MAX_CHUNKS)throw new Error("Image is still too large after resizing. Choose a smaller image.");
-  const imageId=makeId();
-  for(let chunkIndex=0;chunkIndex<totalChunks;chunkIndex++){
-    const data=base64.slice(chunkIndex*CHUNK_SIZE,(chunkIndex+1)*CHUNK_SIZE);
-    await api("uploadChunk",{
-      roomCode,imageId,chunkIndex,totalChunks,
-      fileName:file.name,mimeType:file.type,data
-    });
-    message("galleryStatus","Uploading "+originalFile.name+" · part "+(chunkIndex+1)+" of "+totalChunks+"…");
+    bitmap=await createImageBitmap(file);
+    const scale=Math.min(1,320/Math.max(bitmap.width,bitmap.height));
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+    canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    const context=canvas.getContext("2d");
+    if(!context) return null;
+    context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+    return await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.55));
+  } catch(e) {
+    return null;
+  } finally {
+    if(bitmap) bitmap.close();
   }
-  return {resized:file.size!==originalFile.size};
+}
+async function uploadOne(file) {
+  if(file.size>MAX_IMAGE_BYTES) throw new Error("File is over the 15 MB limit.");
+  const imageId=makeId();
+  const form=new FormData();
+  form.append("image",file,file.name);
+  const thumbnail=await makeThumbnail(file);
+  if(thumbnail) form.append("thumbnail",thumbnail,"thumbnail.jpg");
+  form.append("imageId",imageId);
+  form.append("fileName",file.name);
+  const data=await api("/api/rooms/" + encodeURIComponent(roomCode) + "/images",{
+    method:"POST",
+    body:form
+  });
+  return data;
 }
 $("fileInput").addEventListener("change",async e=>{
   const selected=Array.from(e.target.files||[]);
@@ -165,22 +153,26 @@ $("fileInput").addEventListener("change",async e=>{
   const valid=[],errors=[];
   for(const file of selected){
     if(!ALLOWED_IMAGE_TYPES.includes(file.type))errors.push(file.name+": use PNG, JPG, WebP or GIF");
-    else if(file.size>20*1024*1024)errors.push(file.name+": original file is over 20 MB");
+    else if(file.size>MAX_IMAGE_BYTES)errors.push(file.name+": file is over 15 MB");
     else valid.push(file);
   }
   if(!valid.length){message("galleryStatus",errors.join(" · ")||"No supported images selected.","error");return;}
   const uploadButton=document.querySelector('label[for="fileInput"]');
   uploadButton.style.pointerEvents="none";uploadButton.style.opacity=".55";$("fileInput").disabled=true;
-  let saved=0,resized=0;
+  let saved=0;
   try{
     for(let i=0;i<valid.length;i++){
-      try{const result=await uploadOne(valid[i]);saved++;if(result.resized)resized++;}
-      catch(err){errors.push(valid[i].name+": "+err.message);}
+      try{
+        await uploadOne(valid[i]);
+        saved++;
+      } catch(err) {
+        errors.push(valid[i].name+": "+err.message);
+      }
       message("galleryStatus","Uploading "+(i+1)+" of "+valid.length+"… ("+saved+" saved)");
     }
   }finally{$("fileInput").disabled=false;uploadButton.style.pointerEvents="";uploadButton.style.opacity="";}
   await refreshGallery();
-  const summary=saved+" of "+valid.length+" images saved. "+resized+" resized.";
+  const summary=saved+" of "+valid.length+" images saved.";
   message("galleryStatus",errors.length?summary+" Problems: "+errors.join(" · "):summary,saved===valid.length?"good":"error");
 });
 $("backBtn").addEventListener("click",()=>{
