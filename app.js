@@ -49,9 +49,9 @@ async function openEnteredRoom() {
   }
 }
 
-$("openRoomBtn").addEventListener("click",openEnteredRoom);
 $("roomForm").addEventListener("submit",e=>{
   e.preventDefault();
+  e.stopPropagation();
   openEnteredRoom();
 });
 
