@@ -1,48 +1,43 @@
 # The Secure Gallery Vault
 
-A simple room-based image gallery using Picrd for image hosting. No Google account, Google Sheets, Apps Script, Base64 image storage, or server setup is required.
+A room-based image gallery hosted on GitHub Pages, using Google Sheets and Google Apps Script as its storage API.
 
-## How it works
+## Storage
 
-- The master password is checked in the site's public `app.js` file.
-- Create a room from the site. Picrd creates an album and returns its room code.
-- The room code is the Picrd album ID.
-- Images upload directly to Picrd and are added to that room's album.
-- The gallery reads the album directly from Picrd.
-- Images are uploaded as unlisted.
-- The upload request omits `ttl_seconds`, so Picrd's documented default is no automatic expiry.
+- Spreadsheet ID: `1QZckLOQyYTiTumAtZJOTDb3_fhiVw6KSkAuPUZE3-78`
+- Google Apps Script source: `Code.gs`
+- Images are converted to Base64 in the browser and saved in 40,000-character chunks in the `VaultImages` sheet.
+- Room codes and creation dates are stored in `VaultRooms`.
+- Each image is limited to 4 MB after browser resizing/compression.
+- Original selected files over 20 MB are rejected.
 
-## Master password
+## Setup
 
-The current master password is `vault123`.
+1. Open the Google Sheet linked to the spreadsheet ID above.
+2. Open **Extensions → Apps Script**.
+3. Replace the editor contents with the repository's `Code.gs`.
+4. Save the project.
+5. Select **Deploy → New deployment → Web app**.
+6. Set **Execute as** to your account.
+7. Set **Who has access** to **Anyone** if you want the public GitHub Pages site to use it.
+8. Deploy and copy the web app URL ending in `/exec`.
+9. In `app.js`, replace `PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE` with that URL, then commit the change to GitHub.
 
-Change `MASTER_PASSWORD` near the top of `app.js` if you want a different one. Anyone can inspect public JavaScript and see this password, so it is only a simple screen lock, not real authentication.
+The first request creates the `VaultRooms` and `VaultImages` tabs automatically.
 
-## Rooms
+## API actions
 
-1. Open the site and enter the master password.
-2. Select **Create a new room**.
-3. Save the room code Picrd gives you.
-4. To reopen that room later, enter its room code.
+- `createRoom`: creates a random room code.
+- `listImages`: lists completed images in a room.
+- `uploadChunk`: stores one Base64 chunk.
+- `getImage`: returns the joined Base64 image data.
 
-The room code is the album ID. Anyone who knows it may be able to view the album.
-
-## Image uploads
-
-- PNG, JPG, WebP, and GIF are supported.
-- Multiple images can be uploaded at once.
-- Images are resized/compressed in the browser when needed to fit below 9.5 MB.
-- Oversized animated GIFs are rejected rather than having their animation removed.
-- Uploads are sent directly to Picrd. Images are not converted to Base64 for storage.
+Requests use a plain-text JSON POST body to avoid a browser CORS preflight. The Apps Script web app must be deployed with access allowed to the site's visitors.
 
 ## Privacy and limitations
 
-- Picrd's unlisted images are not publicly listed, but anyone with the image or album URL may be able to view them.
-- The master password is public in the JavaScript.
-- Do not upload sensitive or private images.
-- Picrd is a third-party service. Its availability, limits, and retention policies may change.
-- Picrd documents a 10 MB per-image upload limit and a limit of 60 uploads per hour per IP.
-
-## GitHub Pages
-
-Enable GitHub Pages for the `main` branch and root folder in the repository settings.
+- A room code is an access code, not strong authentication. Anyone who knows it can view its images.
+- The spreadsheet owner can see all stored image data.
+- Base64 increases storage size compared with binary image files.
+- Google Sheets has spreadsheet-wide cell limits and Apps Script has execution and request quotas. This is suitable for a small gallery, not unlimited image hosting.
+- Do not store sensitive or private images here.
