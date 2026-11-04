@@ -19,18 +19,34 @@ function formatSize(bytes) {
   return bytes >= 1024 * 1024 ? (bytes / (1024 * 1024)).toFixed(2) + " MB" : (bytes / 1024).toFixed(0) + " KB";
 }
 async function picrdRequest(url, options={}) {
-  const response = await fetch(url,options);
-  let data;
-  try { data = await response.json(); }
-  catch { throw new Error("Picrd returned an unreadable response."); }
-  if (!response.ok) throw new Error(data.error || "Picrd request failed (HTTP " + response.status + ").");
+  let response;
+  try {
+    response = await fetch(url,options);
+  } catch {
+    throw new Error("Could not connect to Picrd. Check your internet connection or whether Picrd is available.");
+  }
+  let data = {};
+  const body = await response.text();
+  try { data = body ? JSON.parse(body) : {}; }
+  catch { throw new Error("Picrd returned an unreadable response (HTTP " + response.status + ")."); }
+  if (!response.ok) throw new Error(data.error || data.message || "Picrd request failed (HTTP " + response.status + ").");
   return data;
 }
 
+async function picrdRequestWithFallback(primaryUrl, fallbackUrl, options={}) {
+  try {
+    return await picrdRequest(primaryUrl,options);
+  } catch(err) {
+    if (!/HTTP (404|405)/.test(err.message)) throw err;
+    return await picrdRequest(fallbackUrl,options);
+  }
+}
+
 async function loadRoom(albumId) {
-  if (!/^[A-Za-z0-9_-]{5,80}$/.test(albumId)) throw new Error("That room code does not look valid.");
-  const data = await picrdRequest(PICRD_API + "/album/" + encodeURIComponent(albumId));
-  if (!Array.isArray(data.images)) throw new Error("Picrd did not return an album image list.");
+  if (!/^[A-Za-z0-9_-]{5,80}$/.test(albumId)) throw new Error("Use 5–80 letters, numbers, _ or - for a room code.");
+  const encodedId = encodeURIComponent(albumId);
+  const data = await picrdRequestWithFallback(PICRD_API + "/album/" + encodedId,PICRD_API + "/albums/" + encodedId);
+  if (!Array.isArray(data.images)) throw new Error("Picrd did not return an album image list. Check that the room code is correct.");
   roomCode = albumId;
   currentImages = data.images;
   $("roomTitle").textContent = "Room · " + albumId;
@@ -60,11 +76,13 @@ $("createRoomBtn").addEventListener("click",async()=>{
   button.disabled = true;
   message("roomStatus","Creating a Picrd album…");
   try {
-    const data = await picrdRequest(PICRD_API + "/album",{method:"POST"});
-    if (!data.album_id) throw new Error("Picrd did not return a room code.");
-    $("roomCode").value = data.album_id;
-    await loadRoom(data.album_id);
-    message("galleryStatus","New room created. Save its room code: " + data.album_id,"good");
+    const data = await picrdRequestWithFallback(PICRD_API + "/album",PICRD_API + "/albums",{method:"POST"});
+    const createdAlbumId = createdAlbumId || data.albumId || data.data?.album_id || data.data?.albumId;
+    if (!createdAlbumId) throw new Error("Picrd created no room code. Its response was: " + JSON.stringify(data).slice(0,180));
+
+    $("roomCode").value = createdAlbumId;
+    await loadRoom(createdAlbumId);
+    message("galleryStatus","New room created. Save its room code: " + createdAlbumId,"good");
   } catch(err) {
     message("roomStatus",err.message,"error");
   } finally {
