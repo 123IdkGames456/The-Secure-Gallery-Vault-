@@ -19,6 +19,7 @@ button,.file-button{border:0;border-radius:11px;padding:12px 17px;background:var
 .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.toolbar .spacer{flex:1}.room-title{margin:0;font-size:30px}.sub{color:var(--muted);margin:5px 0 0}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:26px}
 .tile{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:14px}.tile img{display:block;width:100%;height:210px;object-fit:cover;background:#0b0c0f}.tile .meta{padding:10px 12px;display:flex;align-items:center;gap:8px}.tile .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:13px;color:#d6d7de}
+.tile .delete-image{padding:5px 8px;background:#38252a;color:#ffaaaa;border:1px solid #68404a;font-size:12px}
 .empty{padding:48px 20px;text-align:center;border:1px dashed #41444e;border-radius:16px;color:var(--muted);margin-top:26px}
 #fileInput{display:none}.note{font-size:12px;color:#888d99;margin-top:18px}
 @media(max-width:560px){main{padding:25px 0}.panel{margin-top:8vh;padding:22px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile img{height:155px}.room-title{font-size:24px}}
@@ -28,15 +29,19 @@ button,.file-button{border:0;border-radius:11px;padding:12px 17px;background:var
 <main>
 <header><div class="brand">◈ <span>THE</span> SECURE GALLERY VAULT</div></header>
 <section id="roomScreen" class="panel">
-<h1>Enter a room</h1><p>Each room has its own private image collection.</p>
-<form id="roomForm"><label for="roomCode">Room access code</label><input id="roomCode" type="text" autocomplete="off" required><button class="full" type="submit">Open room</button></form><button id="createRoomBtn" class="secondary full" type="button">＋ Create a new room</button><div id="roomStatus" class="status" role="status"></div>
+<h1>Enter a room</h1><p>Each room has its own image collection. Share the room code only with people you trust.</p>
+<form id="roomForm"><label for="roomCode">Room access code</label><input id="roomCode" type="text" autocomplete="off" required><button class="full" type="submit">Open room</button></form>
+<button id="createRoomBtn" class="secondary full" type="button">＋ Create a new room</button><div id="roomStatus" class="status" role="status"></div>
 </section>
 <section id="galleryScreen" class="hidden">
-<div class="toolbar"><div><h1 id="roomTitle" class="room-title">Gallery</h1><div class="sub" id="imageCount">Loading images…</div></div><div class="spacer"></div><label class="file-button" for="fileInput">＋ Upload images</label><input id="fileInput" type="file" accept="image/*" multiple><button id="backBtn" class="secondary">Change room</button></div>
-<div id="gallery" class="gallery"></div><div id="galleryEmpty" class="empty hidden">This room is empty.<br>Upload an image to add it here.</div><div id="galleryStatus" class="status"></div>
+<div class="toolbar"><div><h1 id="roomTitle" class="room-title">Gallery</h1><div class="sub" id="imageCount">Loading images…</div></div><div class="spacer"></div>
+<label class="file-button" for="fileInput">＋ Upload images</label><input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+<button id="refreshBtn" class="secondary" type="button">Refresh</button><button id="backBtn" class="secondary" type="button">Change room</button></div>
+<div id="gallery" class="gallery"></div><div id="galleryEmpty" class="empty hidden">This room is empty.<br>Upload an image to add it here.</div><div id="galleryStatus" class="status" role="status"></div>
 </section>
-<div class="note">Original images are uploaded as binary files to private Cloudflare R2 storage.</div>
+<div class="note">Images are uploaded directly to ImageKit as binary files. Room codes are shared access codes, not individual user accounts.</div>
 </main>
-<script src="app.js?v=cloudflare-binary-r2"></script>
+<script src="imagekit-config.js?v=1"></script>
+<script src="app.js?v=imagekit-direct-binary"></script>
 </body>
 </html>
