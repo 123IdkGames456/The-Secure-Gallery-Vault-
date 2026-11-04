@@ -96,14 +96,6 @@ function listImages_(roomCode) {
         thumbnailUrl: String(row[9] || row[8]),
         createdAt: row[6] instanceof Date ? row[6].toISOString() : String(row[6] || "")
       });
-    } else if (row[5]) {
-      images.push({
-        imageId: String(row[1]),
-        fileName: String(row[3]),
-        mimeType: String(row[4]),
-        thumbnailBase64: String(row[5]),
-        legacy: true
-      });
     }
   });
   images.reverse();
