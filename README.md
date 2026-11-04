@@ -1,44 +1,92 @@
 # The Secure Gallery Vault
 
-A room-based image gallery hosted on GitHub Pages, using Google Sheets and Google Apps Script as its storage API.
+A room-based image gallery hosted on GitHub Pages. Images are uploaded as their original binary files to a private Cloudflare R2 bucket through a Cloudflare Worker. No Base64 conversion or chunked image uploads are used.
 
-## Storage
+## Storage architecture
 
-- Spreadsheet ID: `1QZckLOQyYTiTumAtZJOTDb3_fhiVw6KSkAuPUZE3-78`
-- Google Apps Script source: `Code.gs`
-- Images are converted to Base64 in the browser and saved in 40,000-character chunks in the `VaultImages` sheet.
-- Room codes and creation dates are stored in `VaultRooms`.
-- Each image is automatically resized/compressed to fit a maximum of 75 upload parts (40,000 Base64 characters per part), roughly 2.25 MB of image data.
-- Large still images are reduced in dimensions and quality until they fit. Animated GIFs above the limit are rejected because the browser does not recompress their animation.
-- Original selected files over 20 MB are rejected.
+- GitHub Pages hosts the website.
+- Cloudflare Worker handles room creation, image uploads, image listings and image delivery.
+- Cloudflare R2 stores original image files and small JPEG thumbnails as binary objects.
+- Cloudflare KV stores room codes and image metadata.
+- Google Sheets and Google Apps Script are no longer used by the active website.
 
-## Setup
+## Cloudflare setup
 
-1. Open the Google Sheet linked to the spreadsheet ID above.
-2. Open **Extensions → Apps Script**.
-3. Replace the editor contents with the repository's `Code.gs`.
-4. Save the project.
-5. Select **Deploy → New deployment → Web app**.
-6. Set **Execute as** to your account.
-7. Set **Who has access** to **Anyone** if you want the public GitHub Pages site to use it.
-8. Deploy and copy the web app URL ending in `/exec`.
-9. In `app.js`, replace `PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE` with that URL, then commit the change to GitHub.
+### 1. Create the storage resources
 
-The first request creates the `VaultRooms` and `VaultImages` tabs automatically.
+In the Cloudflare dashboard:
 
-## API actions
+1. Open **R2 Object Storage** and create a bucket named `secure-gallery-vault`.
+2. Open **Workers & Pages → KV** and create a namespace, for example `GALLERY_DATA`.
+3. Open **Workers & Pages** and create a Worker named `secure-gallery-vault-api`.
 
-- `createRoom`: creates a random room code.
-- `listImages`: lists completed images in a room.
-- `uploadChunk`: stores one Base64 chunk.
-- `getImage`: returns the joined Base64 image data.
+### 2. Add Worker bindings
 
-Requests use a plain-text JSON POST body to avoid a browser CORS preflight. The Apps Script web app must be deployed with access allowed to the site's visitors.
+Open the Worker settings and add these bindings:
 
-## Privacy and limitations
+- **R2 bucket**: variable name `GALLERY_BUCKET`, bucket `secure-gallery-vault`.
+- **KV namespace**: variable name `GALLERY_DATA`, namespace created in step 1.
 
-- A room code is an access code, not strong authentication. Anyone who knows it can view its images.
-- The spreadsheet owner can see all stored image data.
-- Base64 increases storage size compared with binary image files.
-- Google Sheets has spreadsheet-wide cell limits and Apps Script has execution and request quotas. This is suitable for a small gallery, not unlimited image hosting.
-- Do not store sensitive or private images here.
+The binding names must match exactly.
+
+### 3. Deploy the Worker code
+
+Copy the contents of `worker.js` into the Cloudflare Worker editor and deploy it.
+
+The included `wrangler.toml` is for Wrangler deployments. Replace `REPLACE_WITH_YOUR_KV_NAMESPACE_ID` with the real namespace ID before using it with Wrangler.
+
+### 4. Connect the website
+
+After deploying, copy the Worker URL. It normally looks like:
+
+`https://secure-gallery-vault-api.<your-subdomain>.workers.dev`
+
+Open `app.js` and replace:
+
+`PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE`
+
+with the Worker URL. Commit the change to GitHub.
+
+### 5. Test the API
+
+Open:
+
+`https://YOUR-WORKER-URL/api/health`
+
+It should return JSON showing:
+
+- `ok: true`
+- `storage: "Cloudflare R2"`
+- `upload: "binary"`
+
+Then open the GitHub Pages website, create a room, upload a small image, refresh the room and confirm the image remains visible.
+
+## Upload behavior
+
+- The browser sends the actual image file using `FormData`.
+- No Base64 encoding is used.
+- No 40,000-character chunks are used.
+- Original images up to 15 MB are accepted.
+- The browser creates a small JPEG thumbnail when possible; the thumbnail is also uploaded as a binary file.
+- Original images remain in their original format, including animated GIFs.
+
+## API routes
+
+- `GET /api/health`: service health check.
+- `POST /api/rooms`: create a room.
+- `GET /api/rooms/{roomCode}/images`: list room images.
+- `POST /api/rooms/{roomCode}/images`: upload multipart binary image data.
+- `GET /api/rooms/{roomCode}/images/{imageId}`: retrieve the original image.
+- `GET /api/rooms/{roomCode}/images/{imageId}?variant=thumb`: retrieve its thumbnail.
+
+## Important privacy notes
+
+- R2 objects are private; the Worker delivers them only after checking the room code.
+- A room code is a shared access code, not strong user authentication. Anyone who knows it can view that room.
+- Do not upload sensitive or highly private images.
+- Keep the Worker bindings private; never put R2 API secrets in frontend JavaScript.
+- The current Worker uses KV for room metadata. KV updates are eventually consistent, so this starter setup is intended for a small gallery rather than high-concurrency production workloads.
+
+## Existing Google Apps Script
+
+`Code.gs` is retained in the repository as the previous backend reference. The new website does not call it.
