@@ -1,44 +1,38 @@
-<!doctype html>
-<html lang="en">
+
+<!DOCTYPE html>
+<html lang="no">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101114">
-<title>Shared Image Gallery</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drive Image Gallery</title>
 <style>
-:root{color-scheme:dark;--bg:#101114;--panel:#191b20;--line:#30333b;--muted:#a1a5b0;--text:#f4f5f7;--accent:#b6a0ff;--danger:#ff8585}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#29243c 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-main{width:min(100% - 32px,1200px);margin:0 auto;padding:42px 0}
-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:38px}.brand{font-weight:750;letter-spacing:.02em}.brand span{color:var(--accent)}
-.panel{width:min(100%,440px);margin:10vh auto 0;padding:28px;background:#191b20ed;border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 80px #0006}
-h1{font-size:clamp(25px,5vw,36px);line-height:1.15;margin:0 0 10px}p{color:var(--muted);margin:0 0 22px}
-label{display:block;font-size:14px;color:#d7d8df;margin:16px 0 7px}input,button{font:inherit}input{width:100%;padding:14px 15px;background:#101216;border:1px solid #41444e;border-radius:11px;color:white;outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #b6a0ff22}
-button{border:0;border-radius:11px;padding:12px 17px;background:var(--accent);color:#171321;font-weight:750;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.secondary{background:#292c34;color:var(--text);border:1px solid #41444e}
-.full{width:100%;margin-top:18px}.hidden{display:none!important}.status{min-height:24px;margin-top:14px;color:var(--muted);font-size:14px}.status.error{color:var(--danger)}.status.good{color:#a8e6bd}
-.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.toolbar .spacer{flex:1}.sub{color:var(--muted);margin:5px 0 0}
-.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:26px}
-.tile{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:14px}.tile a{display:block;color:inherit;text-decoration:none}.tile img{display:block;width:100%;height:210px;object-fit:cover;background:#0b0c0f}.tile .meta{padding:10px 12px}.tile .name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#d6d7de}
-.empty{padding:48px 20px;text-align:center;border:1px dashed #41444e;border-radius:16px;color:var(--muted);margin-top:26px}
-.note{font-size:12px;color:#888d99;margin-top:22px}
-@media(max-width:560px){main{padding:25px 0}.panel{margin-top:8vh;padding:22px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile img{height:155px}}
+body {
+  margin: 0;
+  padding: 20px;
+  background: #151515;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+h1 { text-align: center; }
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+  gap: 12px;
+}
+.gallery iframe {
+  width: 100%;
+  height: 220px;
+  border: 0;
+  border-radius: 10px;
+}
 </style>
 </head>
 <body>
-<main>
-<header><div class="brand">◈ <span>SHARED</span> IMAGE GALLERY</div></header>
-<section id="loginScreen" class="panel">
-<h1>Private gallery</h1>
-<p>Enter the gallery password to view the shared images.</p>
-<form id="loginForm"><label for="galleryPassword">Password</label><input id="galleryPassword" type="password" autocomplete="current-password" required><button id="loginBtn" class="full" type="submit">Unlock gallery</button></form>
-<div id="loginStatus" class="status" role="status"></div>
-</section>
-<section id="galleryScreen" class="hidden">
-<div class="toolbar"><div><h1>Image gallery</h1><div class="sub" id="imageCount">Loading images…</div></div><div class="spacer"></div><button id="refreshBtn" class="secondary" type="button">Refresh</button><button id="lockBtn" class="secondary" type="button">Lock</button></div>
-<div id="gallery" class="gallery"></div><div id="galleryEmpty" class="empty hidden">No images found in the Drive folder.</div><div id="galleryStatus" class="status" role="status"></div>
-</section>
-<div class="note">View-only gallery. Images are managed in the original Google Drive folder.</div>
-</main>
-<script src="imagekit-config.js?v=2"></script>
-<script src="app.js?v=drive-readonly-gallery"></script>
+<h1>Image Gallery</h1>
+<div class="gallery">
+  <iframe
+    src="https://drive.google.com/embeddedfolderview?id=1X0xvdegbPGvJvSmWzazES1O-sn-x3rVe#grid">
+  </iframe>
+</div>
 </body>
 </html>
