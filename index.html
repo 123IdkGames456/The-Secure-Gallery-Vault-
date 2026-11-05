@@ -16,8 +16,8 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 #total{margin-left:auto;color:var(--muted);font-size:13px}
 .header-btn{border:1px solid var(--line);border-radius:10px;background:#191d28;color:#e8eaf1;padding:8px 11px;font:inherit;font-size:12px;font-weight:650;white-space:nowrap;cursor:pointer}.header-btn:hover{background:#242a39;border-color:#555d70}.header-btn:active{transform:scale(.97)}
 .hide-toggle{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:#191d28;color:#e8eaf1;font-size:12px;white-space:nowrap}.hide-toggle input{width:17px;height:17px;margin:0;accent-color:#b9a4ff;cursor:pointer}#total{margin-left:auto}
-.tabbar{display:flex;gap:8px;padding:12px 18px 0;max-width:1200px;margin:0 auto}.tab-btn{border:1px solid var(--line);border-radius:10px 10px 0 0;background:#11141d;color:var(--muted);padding:10px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.tab-btn.active{background:#1b2030;color:#fff;border-color:#424b60;border-bottom-color:#b9a4ff}.section-title{width:min(1200px,100%);margin:18px auto 0;padding:0 18px;color:#dfe2ec;font-size:15px;font-weight:750}.media-grid{width:min(1200px,100%);margin:0 auto;padding:14px 18px 24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.help-panel{width:min(1164px,calc(100% - 36px));margin:14px auto 4px;padding:16px 18px;background:#141722;border:1px solid #353c50;border-radius:14px;color:#dfe2ec;font-size:13px;line-height:1.65}.help-panel h3{margin:0 0 8px;font-size:15px;color:#fff}.help-panel ol{margin:8px 0 12px;padding-left:22px}.help-panel p{margin:8px 0;color:#b9c1d1}.help-panel strong{color:#fff}.media-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#141722;padding:10px}.media-card img,.media-card video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:9px;background:#080a10}.media-card a{display:block;color:#c8b8ff;overflow-wrap:anywhere;padding:12px;font-size:13px}.media-card .media-name{color:var(--muted);font-size:12px;padding:8px 3px 2px;overflow-wrap:anywhere}.hidden-section{display:none!important}
-#status,#mediaStatus{padding:18px 20px;color:var(--muted);text-align:center;font-size:14px}
+.tabbar{display:flex;gap:8px;padding:12px 18px 0;max-width:1200px;margin:0 auto}.tab-btn{border:1px solid var(--line);border-radius:10px 10px 0 0;background:#11141d;color:var(--muted);padding:10px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.tab-btn.active{background:#1b2030;color:#fff;border-color:#424b60;border-bottom-color:#b9a4ff}.section-title{width:min(1200px,100%);margin:18px auto 0;padding:0 18px;color:#dfe2ec;font-size:15px;font-weight:750}.media-grid{width:min(1200px,100%);margin:0 auto;padding:14px 18px 24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.help-panel{width:min(1164px,calc(100% - 36px));margin:14px auto 4px;padding:16px 18px;background:#141722;border:1px solid #353c50;border-radius:14px;color:#dfe2ec;font-size:13px;line-height:1.65}.help-panel h3{margin:0 0 8px;font-size:15px;color:#fff}.help-panel ol{margin:8px 0 12px;padding-left:22px}.help-panel p{margin:8px 0;color:#b9c1d1}.help-panel strong{color:#fff}.media-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#141722;padding:10px}.media-card img,.media-card video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:9px;background:#080a10}.media-card a{display:block;color:#c8b8ff;overflow-wrap:anywhere;padding:12px;font-size:13px}.video-actions{display:flex;flex-wrap:wrap;gap:8px}.video-actions a{padding:9px 10px;border:1px solid var(--line);border-radius:9px;text-decoration:none;background:#10131b}.media-card .media-name{color:var(--muted);font-size:12px;padding:8px 3px 2px;overflow-wrap:anywhere}.hidden-section{display:none!important}
+#status,#mediaStatus{padding:18px 20px;color:var(--muted);text-align:center;font-size:14px}.delivery-status{width:min(1164px,calc(100% - 36px));margin:14px auto 0;padding:13px 16px;border:1px solid var(--line);border-radius:13px;background:#141722;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:13px}.delivery-status strong{color:#fff}.delivery-status span{color:#b9c1d1}.delivery-status .good{color:#9ee2b0}.delivery-status .warn{color:#ffd28a}
 #grid{width:min(1200px,100%);margin:0 auto;padding:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .tile{min-width:0;aspect-ratio:1/1;background:linear-gradient(145deg,#191d29,#10131b);border:1px solid var(--line);border-radius:15px;overflow:hidden;cursor:pointer;position:relative}
 .tile img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .2s}.hide-images .tile img{filter:blur(24px) brightness(.55);transform:scale(1.12)}
@@ -35,6 +35,7 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 </head>
 <body>
 <header><h1><span>◈</span> IMAGES</h1><button class="header-btn" id="randomImage" type="button">↝ Random</button><div id="total">Laster…</div><label class="hide-toggle" for="hideImages"><span>Hide images</span><input id="hideImages" type="checkbox"></label></header>
+<section id="deliveryStatus" class="delivery-status" aria-live="polite"><strong>Connection status</strong><span id="deliverySummary">Checking Google Drive…</span></section>
 <nav class="tabbar" aria-label="Gallery tabs"><button class="tab-btn active" id="imagesTab" type="button">Images</button><button class="tab-btn" id="videosTab" type="button">MP4 Videos</button></nav>
 <div id="imagesSection"><div id="status">Henter bilder…</div><section id="grid" aria-label="Bildegalleri"></section></div>
 <div id="videosSection" class="hidden-section"><h2 class="section-title">MP4 Videos</h2><div id="videoStatus" class="status">Loading videos…</div><section id="videoGrid" class="media-grid" aria-label="Videos"></section></div>
@@ -63,6 +64,22 @@ function load(){
   if(!data||!data.ok){$("status").textContent=(data&&data.error)||"Kunne ikke hente bildene.";return;}
   images=Array.isArray(data.images)?data.images:[];
   videos=Array.isArray(data.videos)?data.videos:[];
+  const counts=data.counts||{};
+  const delivery=data.delivery||{};
+  const imageCount=Number.isFinite(counts.images)?counts.images:images.length;
+  const videoCount=Number.isFinite(counts.videos)?counts.videos:videos.length;
+  const shareImages=Number.isFinite(counts.imagesAvailableToClient)?counts.imagesAvailableToClient:images.filter(x=>x.canSendToClient).length;
+  const shareVideos=Number.isFinite(counts.videosAvailableToClient)?counts.videosAvailableToClient:videos.filter(x=>x.canSendToClient).length;
+  const imageReady=typeof delivery.canSendImagesToClient==="boolean"?delivery.canSendImagesToClient:(imageCount>0&&shareImages===imageCount);
+  const videoReady=typeof delivery.canSendVideosToClient==="boolean"?delivery.canSendVideosToClient:(videoCount>0&&shareVideos===videoCount);
+  $("deliverySummary").innerHTML="";
+  const statusText=document.createElement("span");
+  statusText.textContent="Images: "+imageCount+" total · "+shareImages+" shareable · "+(imageReady?"sharing ready":"sharing issue");
+  statusText.className=imageReady?"good":"warn";
+  const videoText=document.createElement("span");
+  videoText.textContent="MP4: "+videoCount+" total · "+shareVideos+" shareable · "+(videoReady?"sharing ready":"sharing issue");
+  videoText.className=videoReady?"good":"warn";
+  $("deliverySummary").append(statusText,videoText);
   $("total").textContent=images.length+" bilder";
   $("status").textContent=images.length?"":"Ingen bilder funnet i mappen.";
   images.forEach((item,i)=>{
@@ -121,50 +138,45 @@ function renderVideos(){
  const grid=$("videoGrid");
  grid.replaceChildren();
  if(!videos.length){
-  $("videoStatus").textContent="No MP4 videos found. Check that the Apps Script returns data.videos and that the video files are shared so anyone with the link can view them.";
+  $("videoStatus").textContent="No MP4 videos found in the Google Drive Videos folder.";
   return;
  }
- $("videoStatus").textContent="";
+ $("videoStatus").textContent="Google Drive reports "+videos.length+" MP4 video(s). Sharing access is enabled, but Drive may still need time to process a newly uploaded video.";
  videos.forEach((item,index)=>{
   const card=document.createElement("article");
   card.className="media-card";
-  const video=document.createElement("video");
-  video.controls=true;
-  video.preload="metadata";
-  video.playsInline=true;
-  video.style.width="100%";
-  video.style.aspectRatio="16 / 9";
-  video.style.background="#080a10";
-  video.src="https://drive.google.com/uc?export=download&id="+encodeURIComponent(item.id);
-  const fallback=()=>{
-   if(card.dataset.fallback==="true")return;
-   card.dataset.fallback="true";
-   video.remove();
-   const frame=document.createElement("iframe");
-   frame.src="https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/preview";
-   frame.title=item.name||("Video "+(index+1));
-   frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
-   frame.allowFullscreen=true;
-   frame.loading="lazy";
-   frame.style.width="100%";
-   frame.style.aspectRatio="16 / 9";
-   frame.style.border="0";
-   frame.style.borderRadius="9px";
-   frame.style.background="#080a10";
-   card.insertBefore(frame,card.firstChild);
-  };
-  video.addEventListener("error",fallback,{once:true});
-  card.append(video);
+  const frame=document.createElement("iframe");
+  frame.src=item.previewUrl||("https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/preview");
+  frame.title=item.name||("Video "+(index+1));
+  frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
+  frame.allowFullscreen=true;
+  frame.loading="eager";
+  frame.referrerPolicy="strict-origin-when-cross-origin";
+  frame.style.width="100%";
+  frame.style.aspectRatio="16 / 9";
+  frame.style.border="0";
+  frame.style.borderRadius="9px";
+  frame.style.background="#080a10";
+  card.append(frame);
   const name=document.createElement("div");
   name.className="media-name";
   name.textContent=item.name||("Video "+(index+1));
   card.append(name);
-  const link=document.createElement("a");
-  link.href="https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/view";
-  link.target="_blank";
-  link.rel="noopener noreferrer";
-  link.textContent="Open video in Google Drive";
-  card.append(link);
+  const actions=document.createElement("div");
+  actions.className="video-actions";
+  const openLink=document.createElement("a");
+  openLink.href="https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/view";
+  openLink.target="_blank";
+  openLink.rel="noopener noreferrer";
+  openLink.textContent="Open in Google Drive";
+  actions.append(openLink);
+  const directLink=document.createElement("a");
+  directLink.href="https://drive.google.com/uc?export=download&id="+encodeURIComponent(item.id);
+  directLink.target="_blank";
+  directLink.rel="noopener noreferrer";
+  directLink.textContent="Open direct MP4";
+  actions.append(directLink);
+  card.append(actions);
   grid.append(card);
  });
 }
