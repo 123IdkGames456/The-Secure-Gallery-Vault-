@@ -77,11 +77,21 @@ function load(){
  document.head.append(script);
 }
 
+function getMediaUrl(value){
+ const text=String(value||"").trim();
+ const markdown=text.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/i);
+ if(markdown)return markdown[2];
+ const angle=text.match(/^<(https?:\/\/[^>]+)>$/i);
+ if(angle)return angle[1];
+ const direct=text.match(/https?:\/\/[^\s<>]+/i);
+ return direct?direct[0].replace(/[),.]+$/,""):"";
+}
 function renderMedia(){
  const grid=$("mediaGrid");
  grid.replaceChildren();
- $("mediaStatus").textContent=mediaItems.length?"": "No GIFs or videos found. Add one direct link per line in the Google Doc.";
- mediaItems.forEach((item,index)=>{
+ const validItems=mediaItems.map(item=>({...item,url:getMediaUrl(item.url||item)})).filter(item=>item.url);
+ $("mediaStatus").textContent=validItems.length?"": (mediaItems.length?"Links were found, but no valid URLs could be read.":"No GIFs or videos found. Add one link per line in the Google Doc.");
+ validItems.forEach((item,index)=>{
   const url=item.url;
   const card=document.createElement("article");
   card.className="media-card";
