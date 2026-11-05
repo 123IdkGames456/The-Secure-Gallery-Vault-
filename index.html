@@ -120,25 +120,51 @@ function renderMedia(){
 function renderVideos(){
  const grid=$("videoGrid");
  grid.replaceChildren();
- $("videoStatus").textContent=videos.length?"":"No MP4 videos found in the Google Drive Videos folder.";
+ if(!videos.length){
+  $("videoStatus").textContent="No MP4 videos found. Check that the Apps Script returns data.videos and that the video files are shared so anyone with the link can view them.";
+  return;
+ }
+ $("videoStatus").textContent="";
  videos.forEach((item,index)=>{
   const card=document.createElement("article");
   card.className="media-card";
-  const frame=document.createElement("iframe");
-  frame.src="https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/preview";
-  frame.title=item.name||("Video "+(index+1));
-  frame.allow="autoplay; fullscreen";
-  frame.allowFullscreen=true;
-  frame.style.width="100%";
-  frame.style.aspectRatio="16 / 9";
-  frame.style.border="0";
-  frame.style.borderRadius="9px";
-  frame.style.background="#080a10";
-  card.append(frame);
+  const video=document.createElement("video");
+  video.controls=true;
+  video.preload="metadata";
+  video.playsInline=true;
+  video.style.width="100%";
+  video.style.aspectRatio="16 / 9";
+  video.style.background="#080a10";
+  video.src="https://drive.google.com/uc?export=download&id="+encodeURIComponent(item.id);
+  const fallback=()=>{
+   if(card.dataset.fallback==="true")return;
+   card.dataset.fallback="true";
+   video.remove();
+   const frame=document.createElement("iframe");
+   frame.src="https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/preview";
+   frame.title=item.name||("Video "+(index+1));
+   frame.allow="autoplay; encrypted-media; picture-in-picture; fullscreen";
+   frame.allowFullscreen=true;
+   frame.loading="lazy";
+   frame.style.width="100%";
+   frame.style.aspectRatio="16 / 9";
+   frame.style.border="0";
+   frame.style.borderRadius="9px";
+   frame.style.background="#080a10";
+   card.insertBefore(frame,card.firstChild);
+  };
+  video.addEventListener("error",fallback,{once:true});
+  card.append(video);
   const name=document.createElement("div");
   name.className="media-name";
   name.textContent=item.name||("Video "+(index+1));
   card.append(name);
+  const link=document.createElement("a");
+  link.href="https://drive.google.com/file/d/"+encodeURIComponent(item.id)+"/view";
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.textContent="Open video in Google Drive";
+  card.append(link);
   grid.append(card);
  });
 }
