@@ -3,22 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090c">
+<meta name="theme-color" content="#090a0f">
 <title>Images</title>
 <style>
+:root{color-scheme:dark;--bg:#090a0f;--panel:#141722;--line:#292f3d;--muted:#9ca5b7;--accent:#b9a4ff}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;max-width:100%;height:100%;overflow:hidden;background:#08090c;color:#f4f5f8;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-main{height:100dvh;width:100vw;max-width:100vw;display:flex;flex-direction:column;overflow:hidden}
-header{height:54px;flex:none;display:flex;align-items:center;padding:0 18px;border-bottom:1px solid #252a35;background:#0d0f15}
-h1{margin:0;font-size:14px;font-weight:800;letter-spacing:.12em}
-h1 span{color:#b9a4ff}
-#frame{display:block;border:0;width:100%;max-width:100%;min-width:0;height:calc(100% - 54px);flex:1;background:#08090c;overflow:hidden}
-@media(max-width:600px){header{height:46px;padding:0 12px}#frame{height:calc(100% - 46px)}}\n</style>
+html,body{margin:0;min-height:100%;width:100%;background:var(--bg);color:#f5f6fa;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{overflow-x:hidden}
+header{height:62px;position:sticky;top:0;z-index:2;display:flex;align-items:center;padding:0 20px;background:#0d0f15ed;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:var(--accent)}
+#total{margin-left:auto;color:var(--muted);font-size:13px}
+#refresh{margin-left:14px;border:1px solid var(--line);border-radius:10px;background:#191d28;color:#fff;padding:8px 12px}
+#status{padding:18px 20px;color:var(--muted);text-align:center;font-size:14px}
+#grid{width:min(1200px,100%);margin:0 auto;padding:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tile{min-width:0;aspect-ratio:1/1;background:linear-gradient(145deg,#191d29,#10131b);border:1px solid var(--line);border-radius:15px;overflow:hidden;cursor:pointer;position:relative}
+.tile img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .2s}
+.tile:hover img{transform:scale(1.035)}
+.tile span{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 9px;background:linear-gradient(transparent,#000b);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#viewer{position:fixed;inset:0;z-index:5;background:#030408f7;display:flex;align-items:center;justify-content:center;padding:60px 72px}
+#viewer.hidden{display:none}
+#big{max-width:100%;max-height:100%;object-fit:contain}
+.vbtn{position:absolute;width:46px;height:46px;border-radius:50%;border:1px solid #454b5a;background:#171b26;color:white;font-size:25px;display:grid;place-items:center}
+#close{top:14px;right:16px;font-size:27px}#prev{left:14px;top:50%;transform:translateY(-50%)}#next{right:14px;top:50%;transform:translateY(-50%)}
+#caption{position:absolute;bottom:16px;left:10px;right:10px;text-align:center;color:#c5cad5;font-size:13px}
+@media(max-width:700px){header{height:54px;padding:0 12px}#grid{padding:10px;gap:8px}.tile{border-radius:10px}.tile span{font-size:10px;padding:18px 7px 7px}#viewer{padding:56px 48px}#prev{left:5px}#next{right:5px}}
+@media(max-width:360px){#grid{gap:6px;padding:7px}}
+</style>
 </head>
 <body>
-<main>
-<header><h1><span>◈</span> IMAGES</h1></header>
-<iframe id="frame" title="Public image gallery" src="https://drive.google.com/embeddedfolderview?id=1X0xvdegbPGvJvSmWzazES1O-sn-x3rVe#grid" allow="fullscreen"></iframe>
-</main>
+<header><h1><span>◈</span> IMAGES</h1><div id="total">Laster…</div><button id="refresh" type="button">Oppdater</button></header>
+<div id="status">Henter bilder…</div>
+<section id="grid" aria-label="Bildegalleri"></section>
+<div id="viewer" class="hidden" role="dialog" aria-modal="true" aria-label="Bildevisning">
+<button class="vbtn" id="close" aria-label="Lukk">×</button>
+<button class="vbtn" id="prev" aria-label="Forrige">‹</button>
+<img id="big" alt="">
+<button class="vbtn" id="next" aria-label="Neste">›</button>
+<div id="caption"></div>
+</div>
+<script>
+const API="https://script.google.com/macros/s/AKfycbwBeqYT_r771bjdviMd5P9JhTfcsfBwxlQr_R-kUiSj4a3hRbfJRbpJDHGqtRpkjkb9/exec";
+const $=id=>document.getElementById(id);
+let images=[],current=0;
+function load(){
+ $("status").textContent="Henter bilder…";$("grid").replaceChildren();$("total").textContent="…";
+ const callback="galleryCallback";
+ const old=document.getElementById("galleryApi");if(old)old.remove();
+ const script=document.createElement("script");script.id="galleryApi";
+ script.src=API+"?callback="+callback+"&t="+Date.now();
+ script.onerror=()=>{$("status").textContent="Kunne ikke hente bildene. Sjekk at Apps Script er publisert som Web app med tilgang for alle.";};
+ window[callback]=data=>{
+  script.remove();
+  if(!data||!data.ok){$("status").textContent=(data&&data.error)||"Kunne ikke hente bildene.";return;}
+  images=Array.isArray(data.images)?data.images:[];
+  $("total").textContent=images.length+" bilder";
+  $("status").textContent=images.length?"":"Ingen bilder funnet i mappen.";
+  images.forEach((item,i)=>{
+   const tile=document.createElement("button");tile.type="button";tile.className="tile";tile.setAttribute("aria-label","Åpne "+item.name);
+   const img=document.createElement("img");img.src=item.url;img.alt=item.name;img.loading="lazy";
+   const name=document.createElement("span");name.textContent=item.name;
+   tile.append(img,name);tile.addEventListener("click",()=>open(i));$("grid").append(tile);
+  });
+ };
+ document.head.append(script);
+}
+function open(i){if(!images.length)return;current=i;$("viewer").classList.remove("hidden");renderViewer()}
+function renderViewer(){const item=images[current];$("big").src=item.url;$("big").alt=item.name;$("caption").textContent=item.name+" · "+(current+1)+" / "+images.length;$("prev").disabled=current===0;$("next").disabled=current===images.length-1}
+function move(n){current=Math.max(0,Math.min(images.length-1,current+n));renderViewer()}
+function close(){$("viewer").classList.add("hidden");$("big").removeAttribute("src")}
+$("refresh").addEventListener("click",load);$("close").addEventListener("click",close);$("prev").addEventListener("click",()=>move(-1));$("next").addEventListener("click",()=>move(1));
+document.addEventListener("keydown",e=>{if($("viewer").classList.contains("hidden"))return;if(e.key==="Escape")close();if(e.key==="ArrowLeft")move(-1);if(e.key==="ArrowRight")move(1)});
+let sx=0;$("viewer").addEventListener("touchstart",e=>sx=e.changedTouches[0].screenX,{passive:true});$("viewer").addEventListener("touchend",e=>{const dx=e.changedTouches[0].screenX-sx;if(Math.abs(dx)>55)move(dx<0?1:-1)},{passive:true});
+load();
+</script>
 </body>
 </html>
