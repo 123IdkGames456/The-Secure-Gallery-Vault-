@@ -10,7 +10,9 @@ function doGet(e) {
   const action = String(params.action || "");
   try {
     let result;
-    if (action === "createRoom") result = createRoom_();
+    if (action === "galleryLogin") result = galleryLogin_(params.password);
+    else if (action === "listDriveImages") result = listDriveImages_(params.token);
+    else if (action === "createRoom") result = createRoom_();
     else if (action === "listImages") result = listImages_(params.roomCode);
     else if (action === "signUpload") result = signUpload_(params.roomCode);
     else if (action === "registerImage") result = registerImage_(params);
@@ -182,4 +184,49 @@ function deleteImage_(roomCode, fileId) {
   }
   sheet.deleteRow(rowNumber);
   return { ok: true };
+}
+
+
+function galleryLogin_(password) {
+  const expected = PropertiesService.getScriptProperties().getProperty("GALLERY_PASSWORD");
+  if (!expected) throw new Error("GALLERY_PASSWORD is not configured in Apps Script Script Properties.");
+  if (String(password || "") !== expected) throw new Error("Incorrect password.");
+  const token = Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, "");
+  CacheService.getScriptCache().put("gallery_session_" + token, "valid", 21600);
+  return { ok: true, token };
+}
+
+function listDriveImages_(token) {
+  const session = String(token || "");
+  if (!/^[a-f0-9]{64}$/i.test(session) || CacheService.getScriptCache().get("gallery_session_" + session) !== "valid") {
+    throw new Error("Gallery session expired. Enter the password again.");
+  }
+  const folderId = PropertiesService.getScriptProperties().getProperty("DRIVE_FOLDER_ID");
+  if (!folderId) throw new Error("DRIVE_FOLDER_ID is not configured in Apps Script Script Properties.");
+  const root = DriveApp.getFolderById(folderId);
+  const images = [];
+  collectDriveImages_(root, images);
+  images.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return { ok: true, images };
+}
+
+function collectDriveImages_(folder, images) {
+  const files = folder.getFiles();
+  while (files.hasNext()) {
+    const file = files.next();
+    const mimeType = file.getMimeType();
+    if (!mimeType || !mimeType.startsWith("image/")) continue;
+    const id = file.getId();
+    images.push({
+      id,
+      name: file.getName(),
+      mimeType,
+      updatedAt: file.getLastUpdated().toISOString(),
+      thumbnailUrl: "https://drive.google.com/thumbnail?id=" + encodeURIComponent(id) + "&sz=w900",
+      imageUrl: "https://drive.google.com/uc?export=view&id=" + encodeURIComponent(id),
+      viewUrl: file.getUrl()
+    });
+  }
+  const folders = folder.getFolders();
+  while (folders.hasNext()) collectDriveImages_(folders.next(), images);
 }
