@@ -62,7 +62,8 @@ function load(){
   script.remove();
   if(!data||!data.ok){$("status").textContent=(data&&data.error)||"Kunne ikke hente bildene.";return;}
   images=Array.isArray(data.images)?data.images:[];
-  mediaItems=Array.isArray(data.media)?data.media:[];
+  mediaItems=extractMediaItems(data.media ?? data.mediaText ?? data.text ?? "");
+
   $("total").textContent=images.length+" bilder";
   $("status").textContent=images.length?"":"Ingen bilder funnet i mappen.";
   images.forEach((item,i)=>{
@@ -77,35 +78,43 @@ function load(){
  document.head.append(script);
 }
 
-function getMediaUrl(value){
- const text=String(value||"").trim();
- const markdown=text.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/i);
- if(markdown)return markdown[2];
- const angle=text.match(/^<(https?:\/\/[^>]+)>$/i);
- if(angle)return angle[1];
- const direct=text.match(/https?:\/\/[^\s<>]+/i);
- return direct?direct[0].replace(/[),.]+$/,""):"";
+function extractMediaItems(source){
+ const values=Array.isArray(source)?source:[source];
+ const found=[];
+ const seen=new Set();
+ values.forEach(value=>{
+  const raw=typeof value==="string"?value:(value&&typeof value==="object"?(value.url||value.text||""):"");
+  const text=String(raw||"");
+  const matches=text.match(/https?:\\/\\/[^\\s<>"']+/gi)||[];
+  matches.forEach(match=>{
+   const url=match.replace(/[)\\],.]+$/,"");
+   if(url&&!seen.has(url)){seen.add(url);found.push({url});}
+  });
+ });
+ return found;
 }
 function renderMedia(){
  const grid=$("mediaGrid");
  grid.replaceChildren();
- const validItems=mediaItems.map(item=>({...item,url:getMediaUrl(item.url||item)})).filter(item=>item.url);
- $("mediaStatus").textContent=validItems.length?"": (mediaItems.length?"Links were found, but no valid URLs could be read.":"No GIFs or videos found. Add one link per line in the Google Doc.");
- validItems.forEach((item,index)=>{
+ $("mediaStatus").textContent=mediaItems.length?"":"No GIFs or videos found. Add URLs as plain text, one per line, in the Google Doc.";
+ mediaItems.forEach((item,index)=>{
   const url=item.url;
   const card=document.createElement("article");
   card.className="media-card";
-  let clean=url.split("?")[0].toLowerCase();
-  if(/\.(gif|png|jpe?g|webp|avif)$/.test(clean)){
-   const img=document.createElement("img");img.src=url;img.alt="Media "+(index+1);img.loading="lazy";card.append(img);
-  }else if(/\.(mp4|webm|ogv|ogg|mov|m4v)$/.test(clean)){
-   const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";video.playsInline=true;card.append(video);
+  const clean=url.split("?")[0].toLowerCase();
+  if(/\\.(gif|png|jpe?g|webp|avif)$/.test(clean)){
+   const img=document.createElement("img");img.src=url;img.alt="Media "+(index+1);img.loading="lazy";img.onerror=()=>{img.replaceWith(makeMediaLink(url));};card.append(img);
+  }else if(/\\.(mp4|webm|ogv|ogg|mov|m4v)$/.test(clean)){
+   const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";video.playsInline=true;video.onerror=()=>{video.replaceWith(makeMediaLink(url));};card.append(video);
   }else{
-   const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open GIF / video link";card.append(link);
+   card.append(makeMediaLink(url));
   }
   const name=document.createElement("div");name.className="media-name";name.textContent="Item "+(index+1);card.append(name);
   grid.append(card);
  });
+}
+function makeMediaLink(url){
+ const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open media link";return link;
 }
 function setTab(tab){
  activeTab=tab;
