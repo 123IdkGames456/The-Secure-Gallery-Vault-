@@ -48,7 +48,7 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 <li>If it opened in a new tab, copy the URL from the address bar.</li>
 <li>Paste that full URL into the Google Doc, on its own line.</li>
 </ol>
-<p><strong>Yes, this is the right kind of link:</strong> a direct URL on <code>images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com</code> with a filename ending in <code>.gif</code>, <code>.jpg</code> or <code>.png</code>. The gallery can display it directly.</p><p><strong>Keep the entire URL.</strong> If it has a long <code>?token=...</code> at the end, copy that too. Do not remove the token or shorten the link; DeviantArt may require it, and some tokens can expire.</p><p><strong>Check the link:</strong> open it in a new tab. A working direct link shows only the image, not the DeviantArt page. It usually contains an image filename ending in .jpg, .png, .gif or .webp.</p>
+<p><strong>Yes, this is the right kind of link:</strong> a direct URL from <code>images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com</code>. It does not have to visibly end in <code>.gif</code>, <code>.jpg</code> or <code>.png</code> — the gallery will try to detect whether an extension-less link is an image or video.</p><p><strong>Keep the entire URL.</strong> If it has a long <code>?token=...</code> at the end, copy that too. Do not remove the token or shorten the link; DeviantArt may require it, and some tokens can expire.</p><p><strong>Check the link:</strong> open it in a new tab. A direct media link should show or play the media itself, not an artwork webpage. The gallery supports direct images, GIFs and videos, including links without a file extension when the host allows embedding.</p>
 <p><strong>Important:</strong> A normal DeviantArt artwork/page link will not embed here. If right-click is unavailable, use DeviantArt's Download option when the artist has enabled it; then host the downloaded file somewhere that provides a direct file URL. Only use artwork you have permission to display.</p>
 </section>
 <div id="mediaStatus" class="status">Loading GIFs and videos…</div><section id="mediaGrid" class="media-grid" aria-label="GIFs and videos"></section></div>
@@ -94,18 +94,38 @@ function load(){
 function renderMedia(){
  const grid=$("mediaGrid");
  grid.replaceChildren();
- $("mediaStatus").textContent=mediaItems.length?"": "No GIFs or videos found. Add one direct link per line in the Google Doc.";
+ $("mediaStatus").textContent=mediaItems.length?"": "No media found. Add one direct image, GIF or video link per line in the Google Doc.";
  mediaItems.forEach((item,index)=>{
   const url=item.url;
   const card=document.createElement("article");
   card.className="media-card";
-  let clean=url.split("?")[0].toLowerCase();
-  if(/\.(gif|png|jpe?g|webp|avif)$/.test(clean)){
-   const img=document.createElement("img");img.src=url;img.alt="Media "+(index+1);img.loading="lazy";card.append(img);
-  }else if(/\.(mp4|webm|ogv|ogg|mov|m4v)$/.test(clean)){
-   const video=document.createElement("video");video.src=url;video.controls=true;video.preload="metadata";video.playsInline=true;card.append(video);
+  const clean=url.split("?")[0].toLowerCase();
+  const isVideo=/\.(mp4|webm|ogv|ogg|mov|m4v)$/.test(clean);
+  const isImage=/\.(gif|png|jpe?g|webp|avif|bmp|svg)$/.test(clean);
+  const addFallbackLink=()=>{
+   if(card.querySelector("a"))return;
+   const link=document.createElement("a");
+   link.href=url;link.target="_blank";link.rel="noopener noreferrer";
+   link.textContent="Could not embed this media — open link";
+   card.insertBefore(link,card.firstChild);
+  };
+  if(isVideo){
+   const video=document.createElement("video");
+   video.src=url;video.controls=true;video.preload="metadata";video.playsInline=true;
+   video.addEventListener("error",addFallbackLink,{once:true});
+   card.append(video);
   }else{
-   const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open GIF / video link";card.append(link);
+   const img=document.createElement("img");
+   img.src=url;img.alt="Media "+(index+1);img.loading="lazy";
+   img.addEventListener("error",()=>{
+    img.remove();
+    if(isImage){addFallbackLink();return;}
+    const video=document.createElement("video");
+    video.src=url;video.controls=true;video.preload="metadata";video.playsInline=true;
+    video.addEventListener("error",addFallbackLink,{once:true});
+    card.insertBefore(video,card.firstChild);
+   },{once:true});
+   card.append(img);
   }
   const name=document.createElement("div");name.className="media-name";name.textContent="Item "+(index+1);card.append(name);
   grid.append(card);
