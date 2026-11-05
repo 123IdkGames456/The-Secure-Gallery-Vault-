@@ -78,6 +78,7 @@ function load(){
   if(!data||!data.ok){$("status").textContent=(data&&data.error)||"Kunne ikke hente bildene.";return;}
   images=Array.isArray(data.images)?data.images:[];
   mediaItems=Array.isArray(data.media)?data.media:[];
+  videos=Array.isArray(data.videos)?data.videos:[];
   $("total").textContent=images.length+" bilder";
   $("status").textContent=images.length?"":"Ingen bilder funnet i mappen.";
   images.forEach((item,i)=>{
@@ -87,6 +88,7 @@ function load(){
    tile.append(img,name);tile.addEventListener("click",()=>open(i));$("grid").append(tile);
   });
   renderMedia();
+  renderVideos();
   setTab(activeTab);
  };
  document.head.append(script);
