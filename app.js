@@ -1,4 +1,5 @@
 const CONFIG = window.IMAGEKIT_CONFIG || {};
+const GALLERY_PASSWORD = "PUT_YOUR_PASSWORD_HERE";
 let galleryToken = "";
 let galleryImages = [];
 
@@ -83,7 +84,8 @@ $("loginForm").addEventListener("submit", async event => {
   button.disabled = true;
   message("loginStatus", "Checking password…");
   try {
-    const data = await jsonp("galleryLogin", { password: $("galleryPassword").value });
+    if ($("galleryPassword").value !== GALLERY_PASSWORD) throw new Error("Incorrect password.");
+    const data = await jsonp("galleryLogin", { password: GALLERY_PASSWORD });
     galleryToken = data.token;
     $("galleryPassword").value = "";
     show("galleryScreen");
