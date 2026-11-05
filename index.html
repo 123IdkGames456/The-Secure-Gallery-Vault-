@@ -1,38 +1,36 @@
-
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Drive Image Gallery</title>
+<meta name="theme-color" content="#101114">
+<title>Secure Gallery Vault</title>
 <style>
-body {
-  margin: 0;
-  padding: 20px;
-  background: #151515;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-h1 { text-align: center; }
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
-  gap: 12px;
-}
-.gallery iframe {
-  width: 100%;
-  height: 220px;
-  border: 0;
-  border-radius: 10px;
-}
+:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif;background:#101114;color:#f4f4f5}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;background:#18191e;border-bottom:1px solid #292a31}
+h1{font-size:19px;margin:0;font-weight:650}
+.actions{display:flex;gap:9px;align-items:center}
+a,button{border:1px solid #393b45;background:#24262d;color:#fff;text-decoration:none;border-radius:9px;padding:10px 13px;font-size:13px;cursor:pointer}
+a:hover,button:hover{background:#30333c}
+main{flex:1;min-height:0;padding:12px}
+.viewer{width:100%;height:calc(100vh - 86px);min-height:500px;border:0;border-radius:12px;background:#18191e}
+.note{padding:0 20px 12px;color:#a1a1aa;font-size:12px}
+@media(max-width:600px){header{padding:13px;align-items:flex-start}h1{font-size:16px}.actions a,.actions button{padding:9px;font-size:12px}.viewer{height:calc(100vh - 105px);min-height:400px}main{padding:8px}}
 </style>
 </head>
 <body>
-<h1>Image Gallery</h1>
-<div class="gallery">
-  <iframe
-    src="https://drive.google.com/embeddedfolderview?id=1X0xvdegbPGvJvSmWzazES1O-sn-x3rVe#grid">
-  </iframe>
+<header>
+<h1>Secure Gallery Vault</h1>
+<div class="actions">
+<button type="button" onclick="document.getElementById('drive').src=document.getElementById('drive').src">Refresh</button>
+<a href="https://drive.google.com/drive/folders/1X0xvdegbPGvJvSmWzazES1O-sn-x3rVe" target="_blank" rel="noopener">Open Drive</a>
 </div>
+</header>
+<main>
+<iframe id="drive" class="viewer" title="All images in the Google Drive folder" loading="eager" allow="fullscreen" src="https://drive.google.com/embeddedfolderview?id=1X0xvdegbPGvJvSmWzazES1O-sn-x3rVe#grid"></iframe>
+</main>
+<div class="note">Images and folders are displayed by Google Drive. The folder must be shared so viewers have permission to see its contents.</div>
 </body>
 </html>
