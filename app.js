@@ -1,5 +1,5 @@
 const CONFIG = window.IMAGEKIT_CONFIG || {};
-const GALLERY_PASSWORD = "PUT_YOUR_PASSWORD_HERE";
+const GALLERY_PASSWORD = "System.activ";
 let galleryToken = "";
 let galleryImages = [];
 
