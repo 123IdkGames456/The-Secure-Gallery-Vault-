@@ -46,7 +46,7 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 <script>
 const API="https://script.google.com/macros/s/AKfycbwBeqYT_r771bjdviMd5P9JhTfcsfBwxlQr_R-kUiSj4a3hRbfJRbpJDHGqtRpkjkb9/exec";
 const $=id=>document.getElementById(id);
-let images=[],current=0;const PASSWORD="SystemClear";const HIDE_KEY="secureGalleryHideImages";
+let images=[],current=0;const PASSWORD_HASH="b9daf3d1eaa5b3f14b61d66b08344d0013c56d51853dc29c1fb9dcadf56170e1";const HIDE_KEY="secureGalleryHideImages";
 function applyHideSetting(){const enabled=localStorage.getItem(HIDE_KEY)==="true";$("hideImages").checked=enabled;document.body.classList.toggle("hide-images",enabled)}
 function load(){
  $("status").textContent="Henter bilder…";$("grid").replaceChildren();$("total").textContent="…";
@@ -74,7 +74,7 @@ function open(i){if(!images.length)return;current=i;$("viewer").classList.remove
 function renderViewer(){const item=images[current];$("big").src=item.url;$("big").alt=item.name;$("caption").textContent=item.name+" · "+(current+1)+" / "+images.length;$("prev").disabled=current===0;$("next").disabled=current===images.length-1}
 function move(n){current=Math.max(0,Math.min(images.length-1,current+n));renderViewer()}
 function close(){$("viewer").classList.add("hidden");$("big").removeAttribute("src")}
-$("refresh").addEventListener("click",load);$("settings").addEventListener("click",()=>$("settingsPanel").classList.toggle("hidden"));$("hideImages").addEventListener("change",e=>{localStorage.setItem(HIDE_KEY,String(e.target.checked));document.body.classList.toggle("hide-images",e.target.checked)});$("loginForm").addEventListener("submit",e=>{e.preventDefault();if($("password").value===PASSWORD){$("login").classList.add("hidden");$("password").value="";}else{$("loginError").textContent="Feil passord. Prøv igjen."; $("password").select();}});$("close").addEventListener("click",close);$("prev").addEventListener("click",()=>move(-1));$("next").addEventListener("click",()=>move(1));
+$("refresh").addEventListener("click",load);$("settings").addEventListener("click",()=>$("settingsPanel").classList.toggle("hidden"));$("hideImages").addEventListener("change",e=>{localStorage.setItem(HIDE_KEY,String(e.target.checked));document.body.classList.toggle("hide-images",e.target.checked)});$("loginForm").addEventListener("submit",e=>{e.preventDefault();const entered=$("password").value;crypto.subtle.digest("SHA-256",new TextEncoder().encode(entered)).then(buffer=>{const hash=Array.from(new Uint8Array(buffer),b=>b.toString(16).padStart(2,"0")).join("");if(hash===PASSWORD_HASH){$("login").classList.add("hidden");$("password").value="";$("loginError").textContent="";}else{$("loginError").textContent="Feil passord. Prøv igjen.";$("password").select();}}).catch(()=>$("loginError").textContent="Kunne ikke kontrollere passordet i denne nettleseren.");});$("close").addEventListener("click",close);$("prev").addEventListener("click",()=>move(-1));$("next").addEventListener("click",()=>move(1));
 document.addEventListener("keydown",e=>{if($("viewer").classList.contains("hidden"))return;if(e.key==="Escape")close();if(e.key==="ArrowLeft")move(-1);if(e.key==="ArrowRight")move(1)});
 let sx=0;$("viewer").addEventListener("touchstart",e=>sx=e.changedTouches[0].screenX,{passive:true});$("viewer").addEventListener("touchend",e=>{const dx=e.changedTouches[0].screenX-sx;if(Math.abs(dx)>55)move(dx<0?1:-1)},{passive:true});
 applyHideSetting();
