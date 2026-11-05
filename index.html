@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090a0f">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Images</title>
 <style>
 :root{color-scheme:dark;--bg:#090a0f;--panel:#141722;--line:#292f3d;--muted:#9ca5b7;--accent:#b9a4ff}
@@ -76,7 +77,9 @@ function close(){$("viewer").classList.add("hidden");$("big").removeAttribute("s
 $("hideImages").addEventListener("change",e=>{localStorage.setItem(HIDE_KEY,String(e.target.checked));document.body.classList.toggle("hide-images",e.target.checked)});$("loginForm").addEventListener("submit",e=>{e.preventDefault();const entered=$("password").value;crypto.subtle.digest("SHA-256",new TextEncoder().encode(entered.toLowerCase())).then(buffer=>{const hash=Array.from(new Uint8Array(buffer),b=>b.toString(16).padStart(2,"0")).join("");if(hash===PASSWORD_HASH){$("login").classList.add("hidden");$("password").value="";$("loginError").textContent="";load();}else{$("login").classList.add("hidden");$("password").value="";images=[];$("total").textContent="0 bilder";$("status").textContent=""; $("grid").replaceChildren();}}).catch(()=>$("loginError").textContent="Kunne ikke kontrollere passordet i denne nettleseren.");});$("close").addEventListener("click",close);$("prev").addEventListener("click",()=>move(-1));$("next").addEventListener("click",()=>move(1));
 document.addEventListener("keydown",e=>{if($("viewer").classList.contains("hidden"))return;if(e.key==="Escape")close();if(e.key==="ArrowLeft")move(-1);if(e.key==="ArrowRight")move(1)});
 let sx=0;$("viewer").addEventListener("touchstart",e=>sx=e.changedTouches[0].screenX,{passive:true});$("viewer").addEventListener("touchend",e=>{const dx=e.changedTouches[0].screenX-sx;if(Math.abs(dx)>55)move(dx<0?1:-1)},{passive:true});
-document.querySelectorAll("button").forEach(button=>{if(/^(oppdater|update|refresh)$/i.test(button.textContent.trim()))button.remove();});
+function removeRefreshButtons(){document.querySelectorAll("button").forEach(button=>{const label=(button.textContent+" "+(button.getAttribute("aria-label")||"")+" "+button.id).trim();if(/oppdater|update|refresh/i.test(label))button.remove();});}
+removeRefreshButtons();
+new MutationObserver(removeRefreshButtons).observe(document.body,{childList:true,subtree:true});
 applyHideSetting();
 </script>
 </body>
