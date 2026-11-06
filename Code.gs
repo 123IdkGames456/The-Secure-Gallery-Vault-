@@ -57,8 +57,7 @@ function listFiles() {
 function getTextSheet() {
   const spreadsheet = SpreadsheetApp.openById(TEXT_SPREADSHEET_ID);
   let sheet = spreadsheet.getSheetByName(TEXT_SHEET_NAME);
-  if (!sheet) sheet = spreadsheet.getSheets()[0];
-  if (!sheet) throw new Error("The spreadsheet has no sheet tab.");
+  if (!sheet) sheet = spreadsheet.insertSheet(TEXT_SHEET_NAME);
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(["ID", "Name", "Content", "Last edited"]);
   } else {
