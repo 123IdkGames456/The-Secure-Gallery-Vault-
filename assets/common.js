@@ -1,4 +1,4 @@
-const API="https://script.google.com/macros/s/AKfycby2U4rxm0a75fq-jZan2ar61JfqZWxC7yhj5EJT-sPA9ZyD-MkEKdMqdB4A8WVJTzB4/exec";
+const API="https://script.google.com/macros/s/AKfycbzg4RUaP8zdP3dzKjjuks5ek7vY7YNjf-JBbAv5ehG5BTusK9KCKfrWdErI23CbiCvd/exec";
 const $=id=>document.getElementById(id);
 let images=[],videos=[],texts=[],uploadTimer=null,uploadBusy=false;
 function showUploadProgress(title,message,percent,indeterminate=false){
