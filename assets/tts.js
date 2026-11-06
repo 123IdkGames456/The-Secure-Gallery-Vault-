@@ -2,7 +2,7 @@ const TTS_KEY="secureGalleryTTS";
 let ttsWords=[],ttsWordIndex=1,ttsRun=0,ttsChunkStart=0,ttsChunkEnd=0;
 function ttsSave(){try{localStorage.setItem(TTS_KEY,JSON.stringify({text:$("ttsText").value,wordIndex:ttsWordIndex}))}catch(e){}}
 function ttsBuildWords(){ttsWords=[];const re=new RegExp("\\S+","g");let m;while((m=re.exec($("ttsText").value)))ttsWords.push({start:m.index,end:re.lastIndex})}
-function ttsProgress(){const total=ttsWords.length;ttsWordIndex=Math.max(1,Math.min(ttsWordIndex,total||1));$("ttsWord").value=ttsWordIndex;$("ttsProgress").textContent="Word "+ttsWordIndex+" / "+total;ttsSave()}
+function ttsProgress(){const total=ttsWords.length;ttsWordIndex=Math.max(1,Math.min(ttsWordIndex,(total||1)+1));$("ttsWord").value=ttsWordIndex;$("ttsProgress").textContent="Word "+ttsWordIndex+" / "+total;ttsSave()}
 function ttsSetStatus(s){$("ttsStatus").textContent=s}
 function ttsWordAt(char){for(let i=0;i<ttsWords.length;i++){if(ttsWords[i].end>char)return i+1}return ttsWords.length+1}
 function ttsCharAt(word){return ttsWords[Math.max(0,Math.min(ttsWords.length-1,word-1))]?.start??0}
