@@ -1,0 +1,6 @@
+const PASSWORD_HASH="c8cf49ca3d8f0a884e24389c9e7090c22f09f63d1b6b9e6c0b2376ad64d4dd3f";
+const AUTH_KEY="secureGalleryAuthenticated";
+async function checkPassword(value){const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value.toLowerCase()));return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,"0")).join("")===PASSWORD_HASH}
+function requireLogin(){if(sessionStorage.getItem(AUTH_KEY)!=="true")location.replace("index.html")}
+function setupLogin(){const form=document.getElementById("loginForm");if(!form)return;form.addEventListener("submit",async e=>{e.preventDefault();const field=document.getElementById("password"),error=document.getElementById("loginError");try{if(await checkPassword(field.value)){sessionStorage.setItem(AUTH_KEY,"true");location.replace("images.html")}else{error.textContent="Wrong password";field.value="";field.focus()}}catch{error.textContent="Could not check password in this browser."}})}
+function setupLogout(){const button=document.getElementById("logout");if(button)button.addEventListener("click",()=>{sessionStorage.removeItem(AUTH_KEY);location.replace("index.html")})}
