@@ -39,17 +39,17 @@ function ttsSpeak(run){
  const text=$("ttsText").value;if(!text.trim()){ttsSetStatus("Enter some text first.");return}
  ttsBuildWords();if(!ttsWords.length)return;
  if(ttsWordIndex>ttsWords.length){ttsSetStatus("Finished");ttsProgress();return}
- const start=ttsCharAt(ttsWordIndex);let dot=text.indexOf(".",start);const end=dot<0?text.length:dot+1;
+ const start=ttsCharAt(ttsWordIndex);const end=text.length;
  const chunk=text.slice(start,end);if(!chunk.trim()){ttsWordIndex=ttsWords.length+1;ttsProgress();ttsSetStatus("Finished");return}
- ttsChunkStart=start;ttsChunkEnd=end;
+ ttsChunkStart=start;ttsChunkEnd=end;const chunkId=++ttsChunkId;
  const utter=new SpeechSynthesisUtterance(chunk);
  const voice=ttsVoices.find(v=>v.voiceURI===$("ttsVoice").value);
  utter.lang=voice?.lang||"en-US";if(voice)utter.voice=voice;
  utter.rate=Number($("ttsRate").value)||0.95;utter.pitch=1;
- utter.onboundary=e=>{if(run!==ttsRun)return;if(e.name==="word"){ttsWordIndex=ttsWordAt(ttsChunkStart+(e.charIndex||0));ttsProgress()}};
- utter.onend=()=>{if(run!==ttsRun)return;ttsWordIndex=ttsWordAt(ttsChunkEnd);ttsProgress();if(ttsWordIndex<=ttsWords.length)ttsSpeak(run);else ttsSetStatus("Finished")};
+ utter.onboundary=e=>{if(run!==ttsRun||chunkId!==ttsChunkId)return;if(e.name==="word"){ttsWordIndex=ttsWordAt(ttsChunkStart+(e.charIndex||0));ttsProgress();ttsArmWatch(run,chunkId)}};
+ utter.onend=()=>{if(run!==ttsRun||chunkId!==ttsChunkId)return;ttsClearWatch();ttsWordIndex=ttsWords.length+1;ttsProgress();ttsSetStatus("Finished")};
  utter.onerror=e=>{if(run===ttsRun&&e.error!=="canceled"&&e.error!=="interrupted")ttsSetStatus("Speech error: "+e.error)};
- ttsSetStatus("Speaking in English…");speechSynthesis.speak(utter);
+ ttsSetStatus("Speaking in English…");speechSynthesis.speak(utter);ttsArmWatch(run,chunkId);
 }
 function playTTS(){if(!("speechSynthesis" in window)){ttsSetStatus("Text-to-speech is not supported in this browser.");return}if(speechSynthesis.paused){speechSynthesis.resume();ttsSetStatus("Speaking…");return}if(speechSynthesis.speaking)return;ttsRun++;ttsSpeak(ttsRun)}
 function pauseTTS(){if("speechSynthesis" in window&&speechSynthesis.speaking){speechSynthesis.pause();ttsSetStatus("Paused");ttsSave()}}
