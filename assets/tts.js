@@ -1,9 +1,24 @@
 const TTS_KEY="secureGalleryTTS";
-let ttsWords=[],ttsWordIndex=1,ttsRun=0,ttsChunkStart=0,ttsChunkEnd=0,ttsVoices=[];
+let ttsWords=[],ttsWordIndex=1,ttsRun=0,ttsChunkStart=0,ttsChunkEnd=0,ttsVoices=[],ttsWatchTimer=null,ttsChunkId=0;
 function ttsSave(){try{localStorage.setItem(TTS_KEY,JSON.stringify({text:$("ttsText").value,wordIndex:ttsWordIndex,voice:$("ttsVoice").value,rate:Number($("ttsRate").value)}))}catch(e){}}
 function ttsBuildWords(){ttsWords=[];const re=new RegExp("\\S+","g");let m;while((m=re.exec($("ttsText").value)))ttsWords.push({start:m.index,end:re.lastIndex})}
 function ttsProgress(){const total=ttsWords.length;ttsWordIndex=Math.max(1,Math.min(ttsWordIndex,(total||1)+1));$("ttsWord").value=ttsWordIndex;$("ttsProgress").textContent="Word "+ttsWordIndex+" / "+total;ttsSave()}
 function ttsSetStatus(s){$("ttsStatus").textContent=s}
+function ttsClearWatch(){if(ttsWatchTimer!==null){clearTimeout(ttsWatchTimer);ttsWatchTimer=null}}
+function ttsArmWatch(run,chunkId){
+ ttsClearWatch();
+ ttsWatchTimer=setTimeout(()=>{
+  if(run!==ttsRun||chunkId!==ttsChunkId)return;
+  if(speechSynthesis.paused){ttsArmWatch(run,chunkId);return}
+  ttsWordIndex=Math.min(ttsWords.length+1,ttsWordIndex+1);
+  ttsProgress();
+  ttsSetStatus("Skipping a stuck word and continuing…");
+  ttsChunkId++;
+  speechSynthesis.cancel();
+  ttsClearWatch();
+  setTimeout(()=>{if(run===ttsRun)ttsSpeak(run)},80);
+ },1100);
+}
 function ttsWordAt(char){for(let i=0;i<ttsWords.length;i++){if(ttsWords[i].end>char)return i+1}return ttsWords.length+1}
 function ttsCharAt(word){return ttsWords[Math.max(0,Math.min(ttsWords.length-1,word-1))]?.start??0}
 function ttsLoadVoices(){
@@ -38,7 +53,7 @@ function ttsSpeak(run){
 }
 function playTTS(){if(!("speechSynthesis" in window)){ttsSetStatus("Text-to-speech is not supported in this browser.");return}if(speechSynthesis.paused){speechSynthesis.resume();ttsSetStatus("Speaking…");return}if(speechSynthesis.speaking)return;ttsRun++;ttsSpeak(ttsRun)}
 function pauseTTS(){if("speechSynthesis" in window&&speechSynthesis.speaking){speechSynthesis.pause();ttsSetStatus("Paused");ttsSave()}}
-function stopTTS(){ttsRun++;if("speechSynthesis" in window)speechSynthesis.cancel();ttsSetStatus("Stopped");ttsSave()}
+function stopTTS(){ttsRun++;ttsChunkId++;ttsClearWatch();if("speechSynthesis" in window)speechSynthesis.cancel();ttsSetStatus("Stopped");ttsSave()}
 function jumpTTS(){ttsBuildWords();const n=Math.max(1,Math.min(ttsWords.length||1,Number($("ttsWord").value)||1));stopTTS();ttsWordIndex=n;ttsProgress();ttsSetStatus("Ready at word "+n)}
 function initTTS(){
  let saved=null;try{saved=JSON.parse(localStorage.getItem(TTS_KEY)||"null")}catch(e){}
