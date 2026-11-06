@@ -12,4 +12,4 @@ $("close").addEventListener("click",closeViewer);$("prev").addEventListener("cli
 $("viewer").addEventListener("touchstart",e=>$("viewer").dataset.touchX=e.changedTouches[0].screenX,{passive:true});$("viewer").addEventListener("touchend",e=>{const dx=e.changedTouches[0].screenX-Number($("viewer").dataset.touchX||0);if(Math.abs(dx)>55)moveImage(dx<0?1:-1)},{passive:true});
 document.addEventListener("keydown",e=>{if($("viewer").classList.contains("hidden"))return;if(e.key==="Escape")closeViewer();else if(e.key==="ArrowLeft")moveImage(-1);else if(e.key==="ArrowRight")moveImage(1)});
 const add=document.createElement("button");add.className="header-btn";add.textContent="＋ Add image";add.addEventListener("click",()=>$("mediaFile").click());document.querySelector("header").insertBefore(add,$("total"));
-setupCommon();applyHideSetting();loadGalleryData(renderImages);
+setupCommon();applyHideSetting();loadGalleryData(data=>{renderImages();const counts=data.counts||{};const status=$("deliverySummary");status.textContent="Images: "+(counts.images??images.length)+" · MP4: "+(counts.videos??0)+" · Connection ready";status.className="good"});
