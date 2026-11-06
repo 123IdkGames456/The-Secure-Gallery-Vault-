@@ -103,5 +103,5 @@ function safeName(name) {
 }
 function ensureTxt(name) {
   name = safeName(name);
-  return /\\.txt$/i.test(name) ? name : name + ".txt";
+  return /\.txt$/i.test(name) ? name : name + ".txt";
 }
