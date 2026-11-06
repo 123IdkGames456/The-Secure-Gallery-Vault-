@@ -47,7 +47,7 @@ function doPost(e) {
     result = { ok: false, error: String(err.message || err) };
   }
   return HtmlService.createHtmlOutput(
-    '<!doctype html><meta charset="utf-8"><script>parent.postMessage(' +
+    '<!doctype html><meta charset="utf-8"><script>window.top.postMessage(' +
     JSON.stringify({ type: "galleryWriteResult", result: result }).replace(/</g, "\\u003c") +
     ', "*");</script>'
   );
