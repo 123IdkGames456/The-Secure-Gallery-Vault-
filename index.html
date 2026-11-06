@@ -1,2 +1,23 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=images.html"><title>Secure Gallery</title><script>location.replace("images.html");</script></head><body><p>Opening gallery… <a href="images.html">Open gallery</a></p></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090a0f">
+<title>Secure Gallery - Login</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="login-page">
+<main class="login-panel">
+<h1>◈ SECURE GALLERY</h1>
+<p>Enter the password to continue.</p>
+<form id="loginForm">
+<input id="password" type="password" autocomplete="current-password" placeholder="Password" required autofocus>
+<button class="header-btn" type="submit">Enter gallery</button>
+<p id="loginError" role="alert" aria-live="polite"></p>
+</form>
+</main>
+<script src="assets/auth.js"></script>
+<script>setupLogin();</script>
+</body>
+</html>
