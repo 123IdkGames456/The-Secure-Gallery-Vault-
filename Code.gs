@@ -23,15 +23,7 @@ function doPost(e) {
   try {
     const p = (e && e.parameter) || {};
     const action = p.action;
-    if (action === "uploadImage" || action === "uploadVideo") {
-      const folderId = action === "uploadImage" ? IMAGE_FOLDER_ID : VIDEO_FOLDER_ID;
-      const bytes = Utilities.base64Decode(p.data || "");
-      const mime = p.mime || (action === "uploadImage" ? "image/jpeg" : "video/mp4");
-      const blob = Utilities.newBlob(bytes, mime, safeName(p.name));
-      const file = DriveApp.getFolderById(folderId).createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      result = { ok: true, id: file.getId(), name: file.getName() };
-    } else if (action === "createText") {
+    if (action === "createText") {
       const name = ensureTxt(p.name || "New text.txt");
       const file = DriveApp.getFolderById(TEXT_FOLDER_ID).createFile(name, p.content || "", MimeType.PLAIN_TEXT);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
@@ -64,7 +56,7 @@ function listFiles() {
     texts: texts,
     counts: { images: images.length, videos: videos.length, texts: texts.length,
       imagesAvailableToClient: images.length, videosAvailableToClient: videos.length },
-    delivery: { canSendImagesToClient: true, canSendVideosToClient: true }
+    delivery: { canSendImagesToClient: false, canSendVideosToClient: false }
   };
 }
 
@@ -86,7 +78,7 @@ function getFiles(folderId, imagesOnly) {
         ? "https://drive.google.com/thumbnail?id=" + encodeURIComponent(id) + "&sz=w1600"
         : "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(id),
       previewUrl: "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview",
-      canSendToClient: true
+      canSendToClient: false
     });
   }
   return files;
