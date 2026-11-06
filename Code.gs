@@ -9,7 +9,7 @@ function doGet(e) {
   try {
     if (action === "read") {
       const file = DriveApp.getFileById(p.id);
-      if (!isInFolder(file, TEXT_FOLDER_ID)) throw new Error("Thi file is not in the Text folder");
+      if (!isInFolder(file, TEXT_FOLDER_ID)) throw new Error("This file is not in the Text folder");
       result = { ok: true, id: file.getId(), name: file.getName(), content: file.getBlob().getDataAsString("UTF-8") };
     } else result = listFiles();
   } catch (err) {
