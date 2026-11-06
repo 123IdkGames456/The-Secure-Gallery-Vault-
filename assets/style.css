@@ -56,3 +56,7 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 .tts-jump input{width:110px;padding:9px 10px;background:#0b0e15;color:white;border:1px solid #353c4d;border-radius:9px;font:inherit}
 .tts-meta{justify-content:space-between;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:12px}
 @media(max-width:600px){.tts-panel{width:calc(100% - 20px);padding:13px}.tts-text{min-height:240px}}
+
+.tts-voice-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;color:#dfe2ec;font-size:13px}
+.tts-voice-controls select{max-width:100%;min-width:220px;padding:9px 10px;background:#0b0e15;color:white;border:1px solid #353c4d;border-radius:9px;font:inherit}
+.tts-voice-controls input{width:150px;accent-color:#8c9eff}
