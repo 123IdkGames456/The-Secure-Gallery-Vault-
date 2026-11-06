@@ -136,7 +136,6 @@ function getFiles(folderId, imagesOnly) {
     const file = iterator.next();
     const mime = file.getMimeType();
     if (imagesOnly && mime.indexOf("image/") !== 0) continue;
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     const id = file.getId();
     files.push({
       id: id,
