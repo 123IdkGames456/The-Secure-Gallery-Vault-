@@ -12,6 +12,7 @@ function doGet(e) {
   try {
     if (action === "read") {
       const file = DriveApp.getFileById(p.id);
+      if (!isInFolder(file, TEXT_FOLDER_ID)) throw new Error("This file is not in the Text folder");
       result = { ok: true, id: file.getId(), name: file.getName(), content: file.getBlob().getDataAsString("UTF-8") };
     } else {
       result = listFiles();
@@ -45,11 +46,7 @@ function doPost(e) {
       result = { ok: true, id: file.getId(), name: file.getName() };
     } else if (action === "updateText") {
       const file = DriveApp.getFileById(p.id);
-      if (file.getParents().hasNext() === false) throw new Error("File not found in Text folder");
-      const parent = file.getParents();
-      let inTextFolder = false;
-      while (parent.hasNext()) if (parent.next().getId() === TEXT_FOLDER_ID) inTextFolder = true;
-      if (!inTextFolder) throw new Error("This file is not in the Text folder");
+      if (!isInFolder(file, TEXT_FOLDER_ID)) throw new Error("This file is not in the Text folder");
       file.setContent(p.content || "");
       if (p.name) file.setName(ensureTxt(p.name));
       result = { ok: true, id: file.getId(), name: file.getName() };
@@ -69,7 +66,7 @@ function doPost(e) {
 function listFiles() {
   const images = getFiles(IMAGE_FOLDER_ID, true);
   const videos = getFiles(VIDEO_FOLDER_ID, false);
-  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\\.txt$/i.test(x.name) || x.mimeType === "text/plain");
+  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\.txt$/i.test(x.name) || x.mimeType === "text/plain");
   return {
     ok: true,
     images: images.filter(x => x.mimeType.indexOf("image/") === 0),
@@ -114,10 +111,18 @@ function output(data, callback) {
   return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
 }
 
+function isInFolder(file, folderId) {
+  const parents = file.getParents();
+  while (parents.hasNext()) {
+    if (parents.next().getId() === folderId) return true;
+  }
+  return false;
+}
+
 function safeName(name) {
   return String(name || "upload").replace(/[\\\\/:*?"<>|]/g, "_").slice(0, 180);
 }
 function ensureTxt(name) {
   name = safeName(name);
-  return /\\.txt$/i.test(name) ? name : name + ".txt";
+  return /\.txt$/i.test(name) ? name : name + ".txt";
 }
