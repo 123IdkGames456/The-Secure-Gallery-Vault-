@@ -46,3 +46,13 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 .upload-bar.upload-error{background:#e06c75;animation:none}
 .upload-progress p{margin:9px 0 0;color:#aeb6c7;font-size:12px}
 @keyframes uploadMove{from{transform:translateX(-5%)}to{transform:translateX(190%)}}
+
+.tts-panel{width:min(1000px,calc(100% - 36px));margin:22px auto;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.tts-panel .section-title{width:100%;margin:0;padding:0}
+.tts-help{color:var(--muted);font-size:13px;line-height:1.5}
+.tts-text{display:block;width:100%;min-height:300px;resize:vertical;padding:15px;background:#0b0e15;color:#f5f6fa;border:1px solid #353c4d;border-radius:11px;font:16px/1.7 system-ui}
+.tts-controls,.tts-jump,.tts-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.tts-jump label{font-size:13px;color:#dfe2ec}
+.tts-jump input{width:110px;padding:9px 10px;background:#0b0e15;color:white;border:1px solid #353c4d;border-radius:9px;font:inherit}
+.tts-meta{justify-content:space-between;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:12px}
+@media(max-width:600px){.tts-panel{width:calc(100% - 20px);padding:13px}.tts-text{min-height:240px}}
