@@ -37,3 +37,12 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 .editor-area{resize:vertical}
 @media(max-width:700px){header{min-height:54px;padding:9px 12px}#total{margin-left:0}.media-grid{grid-template-columns:1fr;padding:10px}.section-title{padding:0 10px}#grid{padding:10px;gap:8px}.tile{border-radius:10px}.tile span{font-size:10px;padding:18px 7px 7px}#viewer{padding:56px 48px}#prev{left:5px}#next{right:5px}}
 @media(max-width:360px){#grid{gap:6px;padding:7px}}
+.upload-progress{width:min(1164px,calc(100% - 36px));margin:12px auto;padding:14px 16px;background:#141722;border:1px solid #39334e;border-radius:13px}
+.upload-progress-top{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:13px}
+#uploadPercent{color:#c8b8ff;font-variant-numeric:tabular-nums}
+.upload-track{height:10px;margin-top:11px;background:#090b12;border:1px solid #303647;border-radius:99px;overflow:hidden}
+.upload-bar{height:100%;width:0;background:linear-gradient(90deg,#9275ed,#c4b4ff);border-radius:99px;transition:width .18s ease}
+.upload-bar.indeterminate{width:35%;animation:uploadMove 1.15s ease-in-out infinite alternate}
+.upload-bar.upload-error{background:#e06c75;animation:none}
+.upload-progress p{margin:9px 0 0;color:#aeb6c7;font-size:12px}
+@keyframes uploadMove{from{transform:translateX(-5%)}to{transform:translateX(190%)}}
