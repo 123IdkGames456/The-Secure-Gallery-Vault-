@@ -6,4 +6,4 @@ $("cancelText").addEventListener("click",()=>$("textEditor").classList.add("hidd
 $("saveText").addEventListener("click",()=>{const code=editCode();if(!code)return;const fields={action:editingTextId?"updateText":"createText",code,name:$("textName").value,content:$("textContent").value};if(editingTextId)fields.id=editingTextId;sendWrite(fields)});
 $("speakText").addEventListener("click",()=>{if(!("speechSynthesis"in window)){alert("Text-to-speech is not supported in this browser.");return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance($("textContent").value);u.lang="nb-NO";speechSynthesis.speak(u)});
 $("stopSpeech").addEventListener("click",()=>{if("speechSynthesis"in window)speechSynthesis.cancel()});
-setupCommon();loadGalleryData(renderTexts);
+function initTexts(){renderTexts()}
