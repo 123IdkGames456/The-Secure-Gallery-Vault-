@@ -1,0 +1,123 @@
+const IMAGE_FOLDER_ID = "1w0R8gjCiNEcMD1AAdfeVplwvzThJaoto";
+const VIDEO_FOLDER_ID = "1HbO0_G4w26iMWhXM_UjQ-Jnaf8x9cTBw";
+const TEXT_FOLDER_ID = "1tao5qocbKyLK_YIX0MtBnDHe3M6erro6";
+
+// Set this to a private code. Anyone who knows it can upload and edit files.
+const EDIT_CODE = "CHANGE-THIS-TO-YOUR-OWN-SECRET-CODE";
+
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  const action = p.action || "list";
+  let result;
+  try {
+    if (action === "read") {
+      const file = DriveApp.getFileById(p.id);
+      result = { ok: true, id: file.getId(), name: file.getName(), content: file.getBlob().getDataAsString("UTF-8") };
+    } else {
+      result = listFiles();
+    }
+  } catch (err) {
+    result = { ok: false, error: String(err.message || err) };
+  }
+  return output(result, p.callback);
+}
+
+function doPost(e) {
+  let result;
+  try {
+    const p = (e && e.parameter) || {};
+    if (!EDIT_CODE || EDIT_CODE.indexOf("CHANGE-THIS") === 0 || p.code !== EDIT_CODE) {
+      throw new Error("Wrong edit code");
+    }
+    const action = p.action;
+    if (action === "uploadImage" || action === "uploadVideo") {
+      const folderId = action === "uploadImage" ? IMAGE_FOLDER_ID : VIDEO_FOLDER_ID;
+      const bytes = Utilities.base64Decode(p.data || "");
+      const mime = p.mime || (action === "uploadImage" ? "image/jpeg" : "video/mp4");
+      const blob = Utilities.newBlob(bytes, mime, safeName(p.name));
+      const file = DriveApp.getFolderById(folderId).createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      result = { ok: true, id: file.getId(), name: file.getName() };
+    } else if (action === "createText") {
+      const name = ensureTxt(p.name || "New text.txt");
+      const file = DriveApp.getFolderById(TEXT_FOLDER_ID).createFile(name, p.content || "", MimeType.PLAIN_TEXT);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      result = { ok: true, id: file.getId(), name: file.getName() };
+    } else if (action === "updateText") {
+      const file = DriveApp.getFileById(p.id);
+      if (file.getParents().hasNext() === false) throw new Error("File not found in Text folder");
+      const parent = file.getParents();
+      let inTextFolder = false;
+      while (parent.hasNext()) if (parent.next().getId() === TEXT_FOLDER_ID) inTextFolder = true;
+      if (!inTextFolder) throw new Error("This file is not in the Text folder");
+      file.setContent(p.content || "");
+      if (p.name) file.setName(ensureTxt(p.name));
+      result = { ok: true, id: file.getId(), name: file.getName() };
+    } else {
+      throw new Error("Unknown action");
+    }
+  } catch (err) {
+    result = { ok: false, error: String(err.message || err) };
+  }
+  return HtmlService.createHtmlOutput(
+    '<!doctype html><meta charset="utf-8"><script>parent.postMessage(' +
+    JSON.stringify({ type: "galleryWriteResult", result: result }).replace(/</g, "\\u003c") +
+    ', "*");</script>'
+  );
+}
+
+function listFiles() {
+  const images = getFiles(IMAGE_FOLDER_ID, true);
+  const videos = getFiles(VIDEO_FOLDER_ID, false);
+  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\\.txt$/i.test(x.name) || x.mimeType === "text/plain");
+  return {
+    ok: true,
+    images: images.filter(x => x.mimeType.indexOf("image/") === 0),
+    videos: videos,
+    texts: texts,
+    counts: { images: images.length, videos: videos.length, texts: texts.length,
+      imagesAvailableToClient: images.length, videosAvailableToClient: videos.length },
+    delivery: { canSendImagesToClient: true, canSendVideosToClient: true }
+  };
+}
+
+function getFiles(folderId, imagesOnly) {
+  const folder = DriveApp.getFolderById(folderId);
+  const iterator = folder.getFiles();
+  const files = [];
+  while (iterator.hasNext()) {
+    const file = iterator.next();
+    const mime = file.getMimeType();
+    if (imagesOnly && mime.indexOf("image/") !== 0) continue;
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    const id = file.getId();
+    files.push({
+      id: id,
+      name: file.getName(),
+      mimeType: mime,
+      url: imagesOnly
+        ? "https://drive.google.com/thumbnail?id=" + encodeURIComponent(id) + "&sz=w1600"
+        : "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(id),
+      previewUrl: "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview",
+      canSendToClient: true
+    });
+  }
+  return files;
+}
+
+function output(data, callback) {
+  const json = JSON.stringify(data);
+  if (callback && /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(callback)) {
+    return ContentService.createTextOutput(callback + "(" + json + ");")
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+}
+
+function safeName(name) {
+  return String(name || "upload").replace(/[\\\\/:*?"<>|]/g, "_").slice(0, 180);
+}
+function ensureTxt(name) {
+  name = safeName(name);
+  return /\\.txt$/i.test(name) ? name : name + ".txt";
+}
