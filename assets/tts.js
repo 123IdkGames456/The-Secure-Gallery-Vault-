@@ -68,3 +68,4 @@ function initTTS(){
  $("ttsRate").addEventListener("input",()=>{$("ttsRateValue").textContent=Number($("ttsRate").value).toFixed(2)+"×";ttsSave()});
 }
 initTTS();
+
