@@ -2,9 +2,6 @@ const IMAGE_FOLDER_ID = "1w0R8gjCiNEcMD1AAdfeVplwvzThJaoto";
 const VIDEO_FOLDER_ID = "1HbO0_G4w26iMWhXM_UjQ-Jnaf8x9cTBw";
 const TEXT_FOLDER_ID = "1tao5qocbKyLK_YIX0MtBnDHe3M6erro6";
 
-// Set this to a private code. Anyone who knows it can upload and edit files.
-const EDIT_CODE = "CHANGE-THIS-TO-YOUR-OWN-SECRET-CODE";
-
 function doGet(e) {
   const p = (e && e.parameter) || {};
   const action = p.action || "list";
@@ -14,9 +11,7 @@ function doGet(e) {
       const file = DriveApp.getFileById(p.id);
       if (!isInFolder(file, TEXT_FOLDER_ID)) throw new Error("This file is not in the Text folder");
       result = { ok: true, id: file.getId(), name: file.getName(), content: file.getBlob().getDataAsString("UTF-8") };
-    } else {
-      result = listFiles();
-    }
+    } else result = listFiles();
   } catch (err) {
     result = { ok: false, error: String(err.message || err) };
   }
@@ -27,9 +22,6 @@ function doPost(e) {
   let result;
   try {
     const p = (e && e.parameter) || {};
-    if (!EDIT_CODE || EDIT_CODE.indexOf("CHANGE-THIS") === 0 || p.code !== EDIT_CODE) {
-      throw new Error("Wrong edit code");
-    }
     const action = p.action;
     if (action === "uploadImage" || action === "uploadVideo") {
       const folderId = action === "uploadImage" ? IMAGE_FOLDER_ID : VIDEO_FOLDER_ID;
@@ -50,9 +42,7 @@ function doPost(e) {
       file.setContent(p.content || "");
       if (p.name) file.setName(ensureTxt(p.name));
       result = { ok: true, id: file.getId(), name: file.getName() };
-    } else {
-      throw new Error("Unknown action");
-    }
+    } else throw new Error("Unknown action");
   } catch (err) {
     result = { ok: false, error: String(err.message || err) };
   }
@@ -66,7 +56,7 @@ function doPost(e) {
 function listFiles() {
   const images = getFiles(IMAGE_FOLDER_ID, true);
   const videos = getFiles(VIDEO_FOLDER_ID, false);
-  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\.txt$/i.test(x.name) || x.mimeType === "text/plain");
+  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\\.txt$/i.test(x.name) || x.mimeType === "text/plain");
   return {
     ok: true,
     images: images.filter(x => x.mimeType.indexOf("image/") === 0),
@@ -113,16 +103,14 @@ function output(data, callback) {
 
 function isInFolder(file, folderId) {
   const parents = file.getParents();
-  while (parents.hasNext()) {
-    if (parents.next().getId() === folderId) return true;
-  }
+  while (parents.hasNext()) if (parents.next().getId() === folderId) return true;
   return false;
 }
 
 function safeName(name) {
-  return String(name || "upload").replace(/[\\\\/:*?"<>|]/g, "_").slice(0, 180);
+  return String(name || "upload").replace(/[\\\\/:*?\"<>|]/g, "_").slice(0, 180);
 }
 function ensureTxt(name) {
   name = safeName(name);
-  return /\.txt$/i.test(name) ? name : name + ".txt";
+  return /\\.txt$/i.test(name) ? name : name + ".txt";
 }
