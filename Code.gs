@@ -26,7 +26,6 @@ function doPost(e) {
     if (action === "createText") {
       const name = ensureTxt(p.name || "New text.txt");
       const file = DriveApp.getFolderById(TEXT_FOLDER_ID).createFile(name, p.content || "", MimeType.PLAIN_TEXT);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       result = { ok: true, id: file.getId(), name: file.getName() };
     } else if (action === "updateText") {
       const file = DriveApp.getFileById(p.id);
@@ -48,7 +47,7 @@ function doPost(e) {
 function listFiles() {
   const images = getFiles(IMAGE_FOLDER_ID, true);
   const videos = getFiles(VIDEO_FOLDER_ID, false);
-  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\\.txt$/i.test(x.name) || x.mimeType === "text/plain");
+  const texts = getFiles(TEXT_FOLDER_ID, false).filter(x => /\.txt$/i.test(x.name) || x.mimeType === "text/plain");
   return {
     ok: true,
     images: images.filter(x => x.mimeType.indexOf("image/") === 0),
