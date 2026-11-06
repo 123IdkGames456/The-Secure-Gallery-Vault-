@@ -4,7 +4,6 @@ function requireLogin(){
     location.replace("index.html");
     return false;
   }
-  sessionStorage.removeItem("secureGalleryLoggedIn");
   return true;
 }
 function setupLogin(){
