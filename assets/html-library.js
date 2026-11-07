@@ -79,11 +79,13 @@ function verifyHTMLOperation(result){
  const op=pendingHTMLOperation;if(!op)return;
  if(!result.ok){$("htmlSaveStatus").textContent=result.error||"Online request failed."; $("htmlStatus").textContent=result.error||"Online request failed.";pendingHTMLOperation=null;loadHTMLLibrary();return}
  if(result.id)op.id=result.id;
- const started=Date.now();
+ if(op.verifying)return;
+ op.verifying=true;
+ const started=op.started||Date.now();
  $("htmlSaveStatus").textContent=op.action==="delete"?"Checking that it was removed…":"Checking that it was published…";
  function check(){
   fetchHTMLRecords((error,records)=>{
-   const found=records.find(item=>String(item.id)===String(op.id));
+   const found=op.id?records.find(item=>String(item.id)===String(op.id)):records.find(item=>item.title===op.title&&item.text===op.text);
    const done=op.action==="delete"?!found:!!found&&found.title===op.title&&found.text===op.text;
    if(!error&&done){
     pendingHTMLOperation=null;
