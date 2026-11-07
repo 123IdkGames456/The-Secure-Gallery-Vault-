@@ -42,7 +42,7 @@ function readHTMLFile(file){
  if(!file)return;
  if(file.size>2*1024*1024){alert("HTML files must be 2 MB or smaller.");$("htmlFile").value="";return}
  const reader=new FileReader();
- reader.onload=()=>{$("htmlCode").value=String(reader.result||"");if(!$("htmlTitle").value.trim())$("htmlTitle").value=file.name.replace(/\.html?$/i,"")};
+ reader.onload=()=>{$("htmlCode").value=String(reader.result||"");if(!$("htmlTitle").value.trim())$("htmlTitle").value=file.name.replace(/\.html?$/i,"");$("htmlSaveStatus").textContent="File loaded. Press Save HTML to upload it."};
  reader.onerror=()=>alert("Could not read that file.");
  reader.readAsText(file);
 }
