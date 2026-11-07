@@ -73,3 +73,22 @@ h1{font-size:14px;letter-spacing:.13em;margin:0;font-weight:850}h1 span{color:va
 .text-card-actions{display:flex;gap:8px;flex-wrap:wrap}
 .danger-btn{border-color:#613a43;color:#ffb5bd}
 @media(max-width:650px){.text-library-grid{grid-template-columns:1fr;width:calc(100% - 20px)}.text-library-intro{width:calc(100% - 20px)}}
+
+
+.html-editor{width:min(1164px,calc(100% - 36px));margin:18px auto;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:15px}
+.html-editor .section-title{width:100%;margin:0;padding:0}
+.html-code-input{min-height:300px;font:13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+.html-editor-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px}
+#htmlFile{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.html-file-label{display:inline-flex;align-items:center}
+.html-library-grid{width:min(1164px,calc(100% - 36px));margin:12px auto 28px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.html-card{min-width:0;padding:15px;background:#141722;border:1px solid var(--line);border-radius:13px}
+.html-card h3{margin:0;color:#f2efff;font-size:15px;overflow-wrap:anywhere}
+.html-preview{position:fixed;inset:0;z-index:20;background:#090a0f;display:flex;flex-direction:column}
+.html-preview-toolbar{height:54px;min-height:54px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--line);background:#10131b;padding:6px 12px}
+.html-preview-toolbar strong{position:absolute;left:14px;max-width:35%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd1df;font-size:12px}
+.html-preview-menu{position:absolute;top:48px;left:50%;transform:translateX(-50%);z-index:3;min-width:180px;padding:6px;background:#191d28;border:1px solid #454b5a;border-radius:12px;box-shadow:0 12px 35px #0009}
+.html-preview-menu button{display:block;width:100%;padding:10px;border:0;border-radius:8px;background:transparent;color:#f4f5fa;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+.html-preview-menu button:hover{background:#292f3d}
+#htmlPreviewFrame{display:block;flex:1;width:100%;height:calc(100% - 54px);border:0;background:white}
+@media(max-width:650px){.html-editor{width:calc(100% - 20px);padding:13px}.html-library-grid{grid-template-columns:1fr;width:calc(100% - 20px)}.html-preview-toolbar strong{max-width:25%;font-size:10px}}
