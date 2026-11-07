@@ -68,7 +68,7 @@ function readRecords_(sheet) {
 }
 
 function saveRecord_(sheet, id, title, content) {
-  const lock = LockService.getDocumentLock();
+  const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     const lastRow = sheet.getLastRow();
