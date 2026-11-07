@@ -1,6 +1,6 @@
 const TTS_KEY="secureGalleryTTS";
 let ttsWords=[],ttsWordIndex=1,ttsRun=0,ttsChunkStart=0,ttsChunkEnd=0,ttsVoices=[],ttsWatchTimer=null,ttsChunkId=0;
-function ttsSave(){try{localStorage.setItem(TTS_KEY,JSON.stringify({text:$("ttsText").value,wordIndex:ttsWordIndex,voice:$("ttsVoice").value,rate:Number($("ttsRate").value)}))}catch(e){}}
+function ttsSave(){try{localStorage.setItem(TTS_KEY,JSON.stringify({text:$("ttsText").value,title:$("ttsTitle").value,wordIndex:ttsWordIndex,voice:$("ttsVoice").value,rate:Number($("ttsRate").value)}))}catch(e){}}
 function ttsBuildWords(){ttsWords=[];const re=new RegExp("\\S+","g");let m;while((m=re.exec($("ttsText").value)))ttsWords.push({start:m.index,end:re.lastIndex})}
 function ttsProgress(){const total=ttsWords.length;ttsWordIndex=Math.max(1,Math.min(ttsWordIndex,(total||1)+1));$("ttsWord").value=ttsWordIndex;$("ttsProgress").textContent="Word "+ttsWordIndex+" / "+total;ttsSave()}
 function ttsSetStatus(s){$("ttsStatus").textContent=s}
@@ -57,11 +57,11 @@ function stopTTS(){ttsRun++;ttsChunkId++;ttsClearWatch();if("speechSynthesis" in
 function jumpTTS(){ttsBuildWords();const n=Math.max(1,Math.min(ttsWords.length||1,Number($("ttsWord").value)||1));stopTTS();ttsWordIndex=n;ttsProgress();ttsSetStatus("Ready at word "+n)}
 function initTTS(){
  let saved=null;try{saved=JSON.parse(localStorage.getItem(TTS_KEY)||"null")}catch(e){}
- if(saved){$("ttsText").value=saved.text||"";ttsWordIndex=Number(saved.wordIndex)||1;if(saved.rate)$("ttsRate").value=saved.rate}
+ if(saved){$("ttsText").value=saved.text||"";$("ttsTitle").value=saved.title||"";ttsWordIndex=Number(saved.wordIndex)||1;if(saved.rate)$("ttsRate").value=saved.rate}
  $("ttsRateValue").textContent=Number($("ttsRate").value).toFixed(2)+"×";
  ttsBuildWords();ttsProgress();ttsLoadVoices();
  if("speechSynthesis" in window)speechSynthesis.onvoiceschanged=ttsLoadVoices;
- $("ttsText").addEventListener("input",()=>{stopTTS();ttsBuildWords();ttsWordIndex=1;ttsProgress();ttsSetStatus("Saved locally")});
+ $("ttsText").addEventListener("input",()=>{stopTTS();ttsBuildWords();ttsWordIndex=1;ttsProgress();ttsSetStatus("Saved locally")});$("ttsTitle").addEventListener("input",ttsSave);
  $("ttsPlay").addEventListener("click",playTTS);$("ttsPause").addEventListener("click",pauseTTS);$("ttsStop").addEventListener("click",stopTTS);$("ttsJump").addEventListener("click",jumpTTS);
  $("ttsWord").addEventListener("keydown",e=>{if(e.key==="Enter")jumpTTS()});
  $("ttsVoice").addEventListener("change",()=>{stopTTS();ttsSave();ttsSetStatus("English voice selected")});
