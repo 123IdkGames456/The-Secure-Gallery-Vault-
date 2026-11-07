@@ -89,6 +89,6 @@ window.addEventListener("message",event=>{
  if(!event.data||event.data.type!=="htmlLibraryResult")return;
  const result=event.data.result||{};
  if(!result.ok){$("htmlSaveStatus").textContent=result.error||"Could not save.";alert(result.error||"Could not save HTML.");return}
- $("htmlSaveStatus").textContent=result.action==="html_delete"?"Removed.":"Saved online.";
- clearHTMLEditor();loadHTMLLibrary();
+ $("htmlSaveStatus").textContent=result.action==="html_delete"?"Removed.":(editingHTMLId?"Edit saved!":"Upload done!");
+ if(result.action==="html_save")clearHTMLEditor();loadHTMLLibrary();
 });
