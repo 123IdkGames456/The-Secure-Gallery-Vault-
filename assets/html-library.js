@@ -87,7 +87,7 @@ $("htmlDownloadButton").addEventListener("click",downloadPlayingHTML);
 $("htmlCloseButton").addEventListener("click",closeHTMLPreview);
 $("htmlReloadButton").addEventListener("click",()=>{if(playingHTML)$("htmlPreviewFrame").srcdoc=playingHTML.html||""});
 window.addEventListener("message",event=>{
- if(!event.data||event.data.type!=="htmlLibraryResult")return;
+ if(!event.data||!["htmlLibraryResult","textLibraryResult"].includes(event.data.type))return;
  const result=event.data.result||{};
  if(!result.ok){$("htmlSaveStatus").textContent=result.error||"Could not save.";alert(result.error||"Could not save HTML.");return}
  $("htmlSaveStatus").textContent=result.action==="delete"?"Removed.":(editingHTMLId?"Edit saved!":"Upload done!");
