@@ -39,7 +39,8 @@ function doPost(e) {
   }
   const messageType = action.indexOf("html_") === 0 ? "htmlLibraryResult" : "textLibraryResult";
   const safe = JSON.stringify({type:messageType,result:result}).replace(/</g,"\\u003c");
-  return HtmlService.createHtmlOutput("<!doctype html><html><body><script>window.parent.postMessage("+safe+",'*');</script>Saved. You can close this window.</body></html>");
+  return HtmlService.createHtmlOutput("<!doctype html><html><body><script>window.parent.postMessage("+safe+",'*');</script>Request complete. You can close this window.</body></html>")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function getLibrarySheet_(name) {
