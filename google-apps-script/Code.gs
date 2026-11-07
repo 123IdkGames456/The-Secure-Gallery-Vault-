@@ -37,7 +37,7 @@ function doPost(e) {
   } catch (error) {
     result = {ok:false,error:String(error),action:action};
   }
-  const messageType = action.indexOf("html_") === 0 ? "htmlLibraryResult" : "textLibraryResult";
+  const messageType = action.indexOf("html_") === 0 || p.kind === "html" || (action === "save" && String(p.title || "").startsWith("[[HTML]] ")) ? "htmlLibraryResult" : "textLibraryResult";
   const safe = JSON.stringify({type:messageType,result:result}).replace(/</g,"\\u003c");
   return HtmlService.createHtmlOutput("<!doctype html><html><body><script>window.parent.postMessage("+safe+",'*');</script>Request complete. You can close this window.</body></html>")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
