@@ -1,6 +1,7 @@
 const TEXT_LIBRARY_API = "https://script.google.com/macros/s/AKfycbwbrXbe2he8rQm2_YOrWTK314CMmMH52k5FVarkMman84mJ8b-jrtTgrG8TwerAUPfRhg/exec";
 let savedTexts = [];
 let textLibraryRequest = 0;
+let editingTextId = "";
 function textApiReady(){return TEXT_LIBRARY_API&&!TEXT_LIBRARY_API.includes("PASTE_SECOND")}
 function loadTextLibrary(){
  const status=$("textStatus"),grid=$("textGrid");
@@ -23,9 +24,17 @@ function renderTextLibrary(){
   const excerpt=document.createElement("p");excerpt.className="text-card-excerpt";excerpt.textContent=item.text.slice(0,240);
   const actions=document.createElement("div");actions.className="text-card-actions";
   const open=document.createElement("button");open.className="header-btn";open.textContent="Open in TTS";open.addEventListener("click",()=>openSavedText(item.id));
+  const edit=document.createElement("button");edit.className="header-btn";edit.textContent="Edit";edit.addEventListener("click",()=>editSavedText(item));
   const del=document.createElement("button");del.className="header-btn danger-btn";del.textContent="Delete";del.addEventListener("click",()=>deleteSavedText(item.id));
-  actions.append(open,del);card.append(title,meta,excerpt,actions);grid.append(card);
+  actions.append(open,edit,del);card.append(title,meta,excerpt,actions);grid.append(card);
  });
+}
+function editSavedText(item){
+ editingTextId=item.id;$("ttsTitle").value=item.title||"";$("ttsText").value=item.text||"";stopTTS();ttsWordIndex=1;ttsBuildWords();ttsProgress();$("textSaveStatus").textContent="Editing saved text";setTab("tts");
+}
+function readTextFile(file){
+ if(!file)return;
+ const reader=new FileReader();reader.onload=()=>{$("ttsText").value=String(reader.result||"");if(!$("ttsTitle").value.trim())$("ttsTitle").value=file.name.replace(/\\.txt$/i,"");$("textSaveStatus").textContent="File loaded. Press Save online to upload it.";};reader.onerror=()=>{$("textSaveStatus").textContent="Could not read file.";};reader.readAsText(file);
 }
 function openSavedText(id){
  const item=savedTexts.find(x=>x.id===id);if(!item)return;
@@ -41,14 +50,16 @@ function sendTextLibraryAction(fields){
 function saveTextOnline(){
  const text=$("ttsText").value;if(!text.trim()){alert("Enter some text first.");return}
  $("textSaveStatus").textContent="Saving online…";
- sendTextLibraryAction({action:"save",title:$("ttsTitle").value.trim()||"Untitled",text});
+ sendTextLibraryAction({action:"save",id:editingTextId,title:$("ttsTitle").value.trim()||"Untitled",text});
 }
 function deleteSavedText(id){if(confirm("Delete this saved text permanently?"))sendTextLibraryAction({action:"delete",id})}
 window.addEventListener("message",event=>{
  if(!event.data||event.data.type!=="textLibraryResult")return;
  const result=event.data.result||{};
  if(!result.ok){$("textSaveStatus").textContent=result.error||"Could not save.";alert(result.error||"Could not save text.");return}
- $("textSaveStatus").textContent=result.action==="delete"?"Deleted online.":"Saved online permanently.";
+ $("textSaveStatus").textContent=result.action==="delete"?"Deleted online.":(editingTextId?"Edit saved!":"Upload done!");
+ if(result.action==="save")editingTextId="";
  loadTextLibrary();
 });
 $("ttsSaveOnline").addEventListener("click",saveTextOnline);
+if($("ttsFile"))$("ttsFile").addEventListener("change",()=>readTextFile($("ttsFile").files[0]));
