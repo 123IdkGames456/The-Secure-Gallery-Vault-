@@ -4,6 +4,7 @@
 const galleryAuthorized = sessionStorage.getItem("secureGalleryLoggedIn") === "true";
 sessionStorage.removeItem("secureGalleryLoggedIn");
 if (!galleryAuthorized) {
+  document.documentElement.style.display = "none";
   window.top.location.replace(new URL("./", window.location.href).href);
 }
 </script>
