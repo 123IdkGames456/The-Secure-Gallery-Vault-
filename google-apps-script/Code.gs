@@ -81,6 +81,7 @@ function saveRecord_(sheet, id, title, content) {
     if (!id || !rowNumber) id = Utilities.getUuid();
     if (!rowNumber) rowNumber = sheet.getLastRow() + 1;
     sheet.getRange(rowNumber,1,1,4).setValues([[id,String(title).slice(0,180),String(content),new Date()]]);
+    SpreadsheetApp.flush();
     return id;
   } finally {
     lock.releaseLock();
@@ -89,7 +90,7 @@ function saveRecord_(sheet, id, title, content) {
 
 function deleteRecord_(sheet, id) {
   if (!id) throw new Error("Missing record ID.");
-  const lock = LockService.getDocumentLock();
+  const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     const lastRow = sheet.getLastRow();
@@ -97,6 +98,7 @@ function deleteRecord_(sheet, id) {
     const ids = sheet.getRange(2,1,lastRow-1,1).getDisplayValues();
     const index = ids.findIndex(row => String(row[0]) === String(id));
     if (index >= 0) sheet.deleteRow(index + 2);
+    SpreadsheetApp.flush();
   } finally {
     lock.releaseLock();
   }
