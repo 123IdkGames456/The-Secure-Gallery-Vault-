@@ -9,7 +9,7 @@ function loadTextLibrary(){
  status.textContent="Loading saved texts…";
  const old=document.getElementById("textLibraryApi");if(old)old.remove();
  const script=document.createElement("script"),callback="textLibraryCallback"+(++textLibraryRequest);
- window[callback]=data=>{delete window[callback];script.remove();if(!data||!data.ok){status.textContent=data?.error||"Could not load saved texts.";return}savedTexts=Array.isArray(data.texts)?data.texts:[];renderTextLibrary()};
+ window[callback]=data=>{delete window[callback];script.remove();if(!data||!data.ok){status.textContent=data?.error||"Could not load saved texts.";return}savedTexts=(Array.isArray(data.texts)?data.texts:[]).filter(item=>!(item.title||"").startsWith("[[HTML]] "));renderTextLibrary()};
  script.id="textLibraryApi";script.src=TEXT_LIBRARY_API+"?action=list&callback="+callback+"&t="+Date.now();
  script.onerror=()=>{delete window[callback];script.remove();status.textContent="Could not connect to the Text Library script. Check its Web app deployment."};
  document.head.append(script);
