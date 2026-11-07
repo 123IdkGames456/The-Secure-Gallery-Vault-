@@ -1,4 +1,4 @@
-const HTML_LIBRARY_API = "https://script.google.com/macros/s/PASTE_YOUR_HTML_LIBRARY_WEB_APP_URL/exec";
+const HTML_LIBRARY_API = "https://script.google.com/macros/s/AKfycbwbrXbe2he8rQm2_YOrWTK314CMmMH52k5FVarkMman84mJ8b-jrtTgrG8TwerAUPfRhg/exec";
 let savedHTML = [];
 let htmlLibraryRequest = 0;
 let editingHTMLId = "";
