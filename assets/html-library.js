@@ -1,4 +1,5 @@
 const HTML_LIBRARY_API = "https://script.google.com/macros/s/AKfycbwbrXbe2he8rQm2_YOrWTK314CMmMH52k5FVarkMman84mJ8b-jrtTgrG8TwerAUPfRhg/exec";
+const HTML_TEXT_PREFIX = "[[HTML]] ";
 let savedHTML = [];
 let htmlLibraryRequest = 0;
 let editingHTMLId = "";
@@ -10,8 +11,8 @@ function loadHTMLLibrary(){
  status.textContent="Loading HTML files…";
  const old=document.getElementById("htmlLibraryApi");if(old)old.remove();
  const script=document.createElement("script"),callback="htmlLibraryCallback"+(++htmlLibraryRequest);
- window[callback]=data=>{delete window[callback];script.remove();if(!data||!data.ok){status.textContent=data?.error||"Could not load HTML files.";return}savedHTML=Array.isArray(data.html)?data.html:[];renderHTMLLibrary()};
- script.id="htmlLibraryApi";script.src=HTML_LIBRARY_API+"?action=html_list&callback="+callback+"&t="+Date.now();
+ window[callback]=data=>{delete window[callback];script.remove();if(!data||!data.ok){status.textContent=data?.error||"Could not load HTML files.";return}savedHTML=(Array.isArray(data.texts)?data.texts:[]).filter(item=>(item.title||"").startsWith(HTML_TEXT_PREFIX)).map(item=>({id:item.id,title:item.title.slice(HTML_TEXT_PREFIX.length),html:item.text||"",updatedAt:item.updatedAt}));renderHTMLLibrary()};
+ script.id="htmlLibraryApi";script.src=HTML_LIBRARY_API+"?action=list&callback="+callback+"&t="+Date.now();
  script.onerror=()=>{delete window[callback];script.remove();status.textContent="Could not connect to the HTML Library. Check the Apps Script Web app deployment."};
  document.head.append(script);
 }
@@ -56,10 +57,10 @@ function sendHTMLAction(fields){
 function saveHTML(){
  const html=$("htmlCode").value;if(!html.trim()){alert("Paste HTML code or choose an HTML file first.");return}
  $("htmlSaveStatus").textContent="Saving…";
- sendHTMLAction({action:"html_save",id:editingHTMLId,title:$("htmlTitle").value.trim()||"Untitled HTML",html});
+ sendHTMLAction({action:"save",kind:"html",id:editingHTMLId,title:HTML_TEXT_PREFIX+($("htmlTitle").value.trim()||"Untitled HTML"),text:html});
 }
 function removeHTML(id){
- if(confirm("Remove this HTML page permanently?"))sendHTMLAction({action:"html_delete",id});
+ if(confirm("Remove this HTML page permanently?"))sendHTMLAction({action:"delete",kind:"html",id});
 }
 function playHTML(item){
  playingHTML=item;$("htmlPreviewTitle").textContent=item.title||"HTML preview";
@@ -89,6 +90,6 @@ window.addEventListener("message",event=>{
  if(!event.data||event.data.type!=="htmlLibraryResult")return;
  const result=event.data.result||{};
  if(!result.ok){$("htmlSaveStatus").textContent=result.error||"Could not save.";alert(result.error||"Could not save HTML.");return}
- $("htmlSaveStatus").textContent=result.action==="html_delete"?"Removed.":(editingHTMLId?"Edit saved!":"Upload done!");
- if(result.action==="html_save")clearHTMLEditor();loadHTMLLibrary();
+ $("htmlSaveStatus").textContent=result.action==="delete"?"Removed.":(editingHTMLId?"Edit saved!":"Upload done!");
+ if(result.action==="save")clearHTMLEditor();loadHTMLLibrary();
 });
