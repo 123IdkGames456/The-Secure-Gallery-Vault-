@@ -63,9 +63,10 @@ function saveHTML(){
 }
 function removeHTML(id){
  if(!confirm("Remove this HTML page permanently?"))return;
- pendingHTMLOperation={action:"delete",id};
- $("htmlStatus").textContent="Deleting… waiting for online confirmation";
+ pendingHTMLOperation={action:"delete",id,started:Date.now(),verifying:false};
+ $("htmlStatus").textContent="Delete sent. Checking the Sheet…";
  sendHTMLAction({action:"delete",kind:"html",id});
+ verifyHTMLOperation({ok:true});
 }
 function fetchHTMLRecords(callback){
  const script=document.createElement("script"),callbackName="htmlVerifyCallback"+(++htmlLibraryRequest);
