@@ -14,7 +14,11 @@ function setupLogin(){
     event.preventDefault();
     if(input.value===GALLERY_PASSWORD){
       sessionStorage.setItem("secureGalleryLoggedIn","true");
-      location.replace("images.html");
+      if(typeof showGallery==="function"){
+        showGallery();
+      }else{
+        location.replace("index.html");
+      }
     }else{
       error.textContent="Wrong password";
       input.value="";
@@ -26,6 +30,10 @@ function setupLogout(){
   const button=document.getElementById("logout");
   if(button)button.addEventListener("click",()=>{
     sessionStorage.removeItem("secureGalleryLoggedIn");
-    location.replace("index.html");
+    if(window.top!==window){
+      window.top.location.replace("index.html");
+    }else{
+      location.replace("index.html");
+    }
   });
 }
