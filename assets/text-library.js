@@ -34,7 +34,7 @@ function editSavedText(item){
 }
 function readTextFile(file){
  if(!file)return;
- const reader=new FileReader();reader.onload=()=>{$("ttsText").value=String(reader.result||"");if(!$("ttsTitle").value.trim())$("ttsTitle").value=file.name.replace(/\\.txt$/i,"");$("textSaveStatus").textContent="File loaded. Press Save online to upload it.";};reader.onerror=()=>{$("textSaveStatus").textContent="Could not read file.";};reader.readAsText(file);
+ const reader=new FileReader();reader.onload=()=>{$("ttsText").value=String(reader.result||"");if(!$("ttsTitle").value.trim())$("ttsTitle").value=file.name.replace(/\.txt$/i,"");$("textSaveStatus").textContent="File loaded. Press Save online to upload it.";};reader.onerror=()=>{$("textSaveStatus").textContent="Could not read file.";};reader.readAsText(file);
 }
 function openSavedText(id){
  const item=savedTexts.find(x=>x.id===id);if(!item)return;
