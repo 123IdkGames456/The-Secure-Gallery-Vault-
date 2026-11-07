@@ -1,4 +1,4 @@
-const TEXT_LIBRARY_API = "PASTE_SECOND_APPS_SCRIPT_WEB_APP_URL_HERE";
+const TEXT_LIBRARY_API = "https://script.google.com/macros/s/AKfycbwbrXbe2he8rQm2_YOrWTK314CMmMH52k5FVarkMman84mJ8b-jrtTgrG8TwerAUPfRhg/exec";
 let savedTexts = [];
 let textLibraryRequest = 0;
 function textApiReady(){return TEXT_LIBRARY_API&&!TEXT_LIBRARY_API.includes("PASTE_SECOND")}
