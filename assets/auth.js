@@ -1,7 +1,10 @@
 const GALLERY_PASSWORD = "diaper";
 function requireLogin(){
-  if(sessionStorage.getItem("secureGalleryLoggedIn")!=="true"){
-    location.replace("index.html");
+  const allowed=sessionStorage.getItem("secureGalleryLoggedIn")==="true";
+  sessionStorage.removeItem("secureGalleryLoggedIn");
+  if(!allowed){
+    if(window.top!==window)window.top.location.replace("index.html");
+    else location.replace("index.html");
     return false;
   }
   return true;
