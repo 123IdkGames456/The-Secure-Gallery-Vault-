@@ -1,5 +1,13 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a0f"><title>Secure Gallery</title><link rel="stylesheet" href="assets/style.css"></head><body>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a0f"><title>Secure Gallery</title><link rel="stylesheet" href="assets/style.css">
+<script>
+const galleryAuthorized = sessionStorage.getItem("secureGalleryLoggedIn") === "true";
+sessionStorage.removeItem("secureGalleryLoggedIn");
+if (!galleryAuthorized) {
+  window.top.location.replace(new URL("./", window.location.href).href);
+}
+</script>
+</head><body>
 <header><h1><span>◈</span> SECURE GALLERY</h1><button class="nav-link active" data-tab="images" type="button">Images</button><button class="nav-link" data-tab="videos" type="button">Videos</button><button class="nav-link" data-tab="tts" type="button">TTS</button><button class="nav-link" data-tab="texts" type="button">Texts</button><button class="nav-link" id="randomImage" type="button">Random image</button><div id="total"></div><label class="hide-toggle" id="hideControl" for="hideImages"><span>Hide images</span><input id="hideImages" type="checkbox"></label></header>
 <section class="delivery-status"><strong>Connection status</strong><span id="deliverySummary">Loading images and videos…</span></section>
 <section id="uploadProgress" class="upload-progress hidden-section" aria-live="polite"><div class="upload-progress-top"><strong id="uploadTitle">Uploading file</strong><span id="uploadPercent">0%</span></div><div class="upload-track"><div id="uploadBar" class="upload-bar"></div></div><p id="uploadMessage">Preparing file…</p></section>
@@ -7,11 +15,11 @@
 <main id="videosSection" class="hidden-section"><h2 class="section-title">Videos</h2><div id="videoStatus">Waiting to load videos…</div><section id="videoGrid" class="media-grid" aria-label="Videos"></section></main>
 <main id="ttsSection" class="hidden-section"><section class="tts-panel"><h2 class="section-title">Text to Speech</h2><p class="tts-help">Reading position is saved locally. Use Save online to keep a permanent copy in your Google Sheet.</p><label class="library-title-label" for="ttsTitle">Text title</label><input id="ttsTitle" class="library-title-input" type="text" maxlength="180" placeholder="Give this text a name"><textarea id="ttsText" class="tts-text" placeholder="Enter or paste your text here…"></textarea><div class="tts-voice-controls"><label for="ttsVoice">English voice</label><select id="ttsVoice"><option value="">Finding English voices…</option></select><label for="ttsRate">Speed <span id="ttsRateValue">0.95×</span></label><input id="ttsRate" type="range" min="0.75" max="1.15" step="0.05" value="0.95"></div><div class="tts-controls"><button class="header-btn" id="ttsSaveOnline" type="button">Save online</button><span id="textSaveStatus" class="text-save-status"></span><button class="header-btn" id="ttsPlay" type="button">▶ Play / Continue</button><button class="header-btn" id="ttsPause" type="button">Ⅱ Pause</button><button class="header-btn" id="ttsStop" type="button">Stop</button></div><div class="tts-jump"><label for="ttsWord">Start at word</label><input id="ttsWord" type="number" min="1" value="1"><button class="header-btn" id="ttsJump" type="button">Go to word</button></div><div class="tts-meta"><span id="ttsProgress">Word 1</span><span id="ttsStatus">Ready</span></div></section></main><main id="textsSection" class="hidden-section"><h2 class="section-title">Online Text Library</h2><p class="text-library-intro">Saved texts are stored in your Google Sheet, not just on this device.</p><div id="textStatus">Loading saved texts…</div><section id="textGrid" class="text-library-grid"></section></main>
 
-<script src="assets/auth.js"></script><script src="assets/common.js"></script><script src="assets/images.js"></script><script src="assets/videos.js"></script><script src="assets/tts.js"></script><script src="assets/text-library.js"></script>
+<script src="assets/auth.js?v=3"></script><script src="assets/common.js"></script><script src="assets/images.js"></script><script src="assets/videos.js"></script><script src="assets/tts.js"></script><script src="assets/text-library.js"></script>
 <script>
 let activeTab="images",galleryLoaded=false;
 function setTab(tab){activeTab=tab;const imageAdd=$("addImageButton"),videoAdd=$("addVideoButton");if(imageAdd)imageAdd.classList.toggle("hidden-section",tab!=="images");if(videoAdd)videoAdd.classList.toggle("hidden-section",tab!=="videos");["images","videos","tts","texts"].forEach(name=>{document.getElementById(name+"Section").classList.toggle("hidden-section",name!==tab);document.querySelector('[data-tab="'+name+'"]').classList.toggle("active",name===tab)});$("hideControl").classList.toggle("hidden-section",tab!=="images");if(tab!=="images")closeViewer();if(tab!=="tts")pauseTTS();if(tab==="texts")loadTextLibrary();$("total").textContent=tab==="images"?images.length+" images":tab==="videos"?videos.length+" videos":tab==="texts"?savedTexts.length+" saved texts":"Text to speech"}
 document.querySelectorAll("[data-tab]").forEach(button=>button.addEventListener("click",()=>setTab(button.dataset.tab)));
 function loadEverything(){if(galleryLoaded)return;galleryLoaded=true;loadGalleryData(()=>{initImages();initVideos();$("deliverySummary").textContent="Images and videos loaded";$("deliverySummary").className="good";setTab("images")})}
-if(requireLogin()){setupCommon();loadEverything();}
+if(galleryAuthorized){setupCommon();loadEverything();}
 </script></body></html>
