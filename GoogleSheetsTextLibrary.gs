@@ -77,7 +77,7 @@ function deleteText(id) {
   return { ok: true, action: "delete", id: id };
 }
 
-function countWords(value) { const s = String(value || "").trim(); return s ? s.split(/\\s+/).length : 0; }
+function countWords(value) { const s = String(value || "").trim(); return s ? s.split(/\s+/).length : 0; }
 function output(data, callback) {
   const json = JSON.stringify(data);
   if (callback && /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(callback))
