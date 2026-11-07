@@ -3,7 +3,8 @@ function requireLogin(){
   const allowed=sessionStorage.getItem("secureGalleryLoggedIn")==="true";
   sessionStorage.removeItem("secureGalleryLoggedIn");
   if(!allowed){
-    if(window.top!==window)window.top.location.replace("index.html");
+    document.documentElement.style.display="none";
+    if(window.top!==window)window.top.location.replace(new URL("./",window.location.href).href);
     else location.replace("index.html");
     return false;
   }
@@ -36,7 +37,7 @@ function setupLogout(){
     if(window.top!==window){
       window.top.location.replace("index.html");
     }else{
-      location.replace("index.html");
+      location.replace(new URL("./",window.location.href).href);
     }
   });
 }
